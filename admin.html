@@ -8,9 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
     <!-- Admin styles -->
-    <link rel="stylesheet" href="admin.css?v=4">
+    <link rel="stylesheet" href="admin.css?v=5">
     <style>
         .hidden { display: none !important; }
     </style>
@@ -112,29 +112,41 @@
                                         <button id="changeProductImageBtn" class="btn-primary" style="background: rgba(0,0,0,0.8); border: 1px solid #fff;">Change Image</button>
                                         <input type="file" id="vpImageInput" accept="image/*" class="hidden">
                                     </div>
+                                    <span class="sale-badge" id="vpSaleBadge" style="display: none;">SALE</span>
                                     <div class="main-image-wrapper">
                                         <img id="vpImagePreview" src="" alt="Product Preview" style="width: 100%; max-width: 500px; height: auto;">
                                     </div>
                                 </div>
                                 
                                 <div class="product-details">
-                                    <h1 contenteditable="true" id="vpName" class="editable-element" style="font-family: 'Montserrat', sans-serif; font-size: 2.5rem; margin-bottom: 0.5rem; display: inline-block;">New Shoe Name</h1>
+                                    <h1 contenteditable="true" id="vpName" class="editable-element" data-placeholder="Enter Product Name" style="font-family: 'Montserrat', sans-serif; font-size: 2.5rem; margin-bottom: 0.5rem; display: inline-block;"></h1>
                                     
                                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
                                         <span style="font-size: 1.5rem; font-weight: 600;">Tk</span>
-                                        <span contenteditable="true" id="vpPrice" class="editable-element" style="font-size: 1.5rem; font-weight: 600; min-width: 50px;">0</span>
+                                        <span contenteditable="true" id="vpPrice" class="editable-element" data-placeholder="Price" style="font-size: 1.5rem; font-weight: 600; min-width: 50px;"></span>
+                                        <span style="color: #999; font-size: 1.2rem; display: flex; align-items: center; gap: 5px; margin-left: 10px;">
+                                            Tk <span contenteditable="true" id="vpComparePrice" class="editable-element compare-price" data-placeholder="Old Price (Optional)" style="min-width: 60px;"></span>
+                                        </span>
                                     </div>
 
-                                    <p contenteditable="true" id="vpDesc" class="editable-element product-description" style="color: #666; margin-bottom: 2rem; line-height: 1.6;">Enter description here. A timeless classic redesigned for the modern street.</p>
+                                    <p contenteditable="true" id="vpDesc" class="editable-element product-description" data-placeholder="Enter product description here..." style="color: #666; margin-bottom: 2rem; line-height: 1.6;"></p>
                                     
                                     <div class="selector-section" style="margin-bottom: 1.5rem;">
                                         <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Colors (Hex Codes)</h3>
-                                        <div contenteditable="true" id="vpColors" class="editable-element" style="padding: 10px; border: 1px dashed #ccc; border-radius: 4px; color: #555;">#000000, #ffffff</div>
+                                        <div contenteditable="true" id="vpColors" class="editable-element" data-placeholder="#000000, #ffffff" style="padding: 10px; border: 1px dashed #ccc; border-radius: 4px; color: #555;"></div>
                                     </div>
 
                                     <div class="selector-section" style="margin-bottom: 1.5rem;">
-                                        <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Sizes (Comma Separated)</h3>
-                                        <div contenteditable="true" id="vpSizes" class="editable-element" style="padding: 10px; border: 1px dashed #ccc; border-radius: 4px; color: #555;">7, 8, 9, 10, 11</div>
+                                        <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Sizes</h3>
+                                        <div class="size-checkbox-grid" id="vpSizesContainer">
+                                            <label class="size-checkbox-item"><input type="checkbox" value="6">6</label>
+                                            <label class="size-checkbox-item"><input type="checkbox" value="7">7</label>
+                                            <label class="size-checkbox-item"><input type="checkbox" value="8">8</label>
+                                            <label class="size-checkbox-item"><input type="checkbox" value="9">9</label>
+                                            <label class="size-checkbox-item"><input type="checkbox" value="10">10</label>
+                                            <label class="size-checkbox-item"><input type="checkbox" value="11">11</label>
+                                            <label class="size-checkbox-item"><input type="checkbox" value="12">12</label>
+                                        </div>
                                     </div>
                                     
                                     <button class="btn-pill add-to-cart-btn" style="opacity:0.5; cursor:not-allowed;">Preview Add to Cart</button>

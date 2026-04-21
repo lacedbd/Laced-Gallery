@@ -18,7 +18,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (product) {
                 // Render product info
                 document.getElementById('productTitle').textContent = product.name;
-                document.getElementById('productPrice').textContent = 'Tk ' + product.price.toLocaleString();
+                
+                let priceHTML = '';
+                if (product.compareAtPrice && product.compareAtPrice > product.price) {
+                    priceHTML = `<span class="compare-price">Tk ${product.compareAtPrice.toLocaleString()}</span>`;
+                    const badge = document.getElementById('liveSaleBadge');
+                    if (badge) badge.style.display = 'block';
+                }
+                priceHTML += `Tk ${product.price.toLocaleString()}`;
+                
+                document.getElementById('productPrice').innerHTML = priceHTML;
                 document.getElementById('mainProductImg').src = product.imageUrl;
                 document.getElementById('productDesc').textContent = product.description;
 

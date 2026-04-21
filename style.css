@@ -268,6 +268,32 @@ a {
     font-weight: 500;
 }
 
+/* Sale Badge */
+.sale-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: #e60000;
+    color: #fff;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    z-index: 5;
+    box-shadow: 0 4px 10px rgba(230,0,0,0.3);
+}
+
+/* Strikethrough Price */
+.compare-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.9em;
+    margin-right: 8px;
+    font-weight: 500;
+}
+
 /* Trending Section */
 .trending {
     padding: 0 5% 6rem;

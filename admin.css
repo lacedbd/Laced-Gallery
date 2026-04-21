@@ -72,6 +72,30 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; }
 .editable-element:focus {
     outline: 2px solid #fff; background: rgba(0,0,0,0.4);
 }
+.editable-element:empty::before {
+    content: attr(data-placeholder);
+    color: #999;
+    pointer-events: none;
+    display: block;
+}
+
+.size-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+    gap: 10px;
+}
+.size-checkbox-item {
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid #ccc; border-radius: 4px; padding: 8px 0;
+    cursor: pointer; user-select: none; transition: 0.2s; font-weight: 500;
+}
+.size-checkbox-item input[type="checkbox"] {
+    display: none;
+}
+.size-checkbox-item:has(input[type="checkbox"]:checked) {
+    background: #000; color: #fff; border-color: #000;
+}
+
 .hero-edit-overlay {
     position: absolute; top: 20px; right: 20px; z-index: 10;
 }

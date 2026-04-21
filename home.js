@@ -33,10 +33,14 @@ function renderProducts(products) {
             a.style.background = '#f8f9fa';
             a.innerHTML = `
                 <div class="img-wrapper">
+                    ${p.compareAtPrice && p.compareAtPrice > p.price ? '<span class="sale-badge">SALE</span>' : ''}
                     <img src="${p.imageUrl}" alt="${p.name}">
                 </div>
                 <h3>${p.name}</h3>
-                <p>Tk ${p.price}</p>
+                <p>
+                    ${p.compareAtPrice && p.compareAtPrice > p.price ? `<span class="compare-price">Tk ${p.compareAtPrice.toLocaleString()}</span>` : ''}
+                    Tk ${p.price.toLocaleString()}
+                </p>
             `;
             grid.appendChild(a);
         }

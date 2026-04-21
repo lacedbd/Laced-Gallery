@@ -173,19 +173,36 @@ vpImageInput.addEventListener('change', (e) => {
 
 document.getElementById('openAddProductBtn').addEventListener('click', () => {
     document.getElementById('vpId').value = '';
-    document.getElementById('vpName').innerText = 'New Shoe Name';
-    document.getElementById('vpPrice').innerText = '0';
+    document.getElementById('vpName').innerText = '';
+    document.getElementById('vpPrice').innerText = '';
+    document.getElementById('vpComparePrice').innerText = '';
     document.getElementById('vpCategory').value = 'high';
-    document.getElementById('vpSizes').innerText = '7, 8, 9, 10, 11';
-    document.getElementById('vpColors').innerText = '#000000, #ffffff';
-    document.getElementById('vpDesc').innerText = 'Enter description here. A timeless classic redesigned for the modern street.';
+    document.querySelectorAll('#vpSizesContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
+    document.getElementById('vpColors').innerText = '';
+    document.getElementById('vpDesc').innerText = '';
     document.getElementById('vpVisible').checked = true;
     document.getElementById('vpImagePreview').src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // Transparent placeholder
     document.getElementById('vpImageInput').value = '';
+    document.getElementById('vpSaleBadge').style.display = 'none';
     
     productsListView.classList.add('hidden');
     productVisualEditor.classList.remove('hidden');
 });
+
+document.getElementById('vpComparePrice').addEventListener('input', updateSaleBadgePreview);
+document.getElementById('vpPrice').addEventListener('input', updateSaleBadgePreview);
+
+function updateSaleBadgePreview() {
+    const p = Number(document.getElementById('vpPrice').innerText.trim().replace(/[^0-9.]/g, '')) || 0;
+    const cpText = document.getElementById('vpComparePrice').innerText.trim().replace(/[^0-9.]/g, '');
+    const cp = cpText ? Number(cpText) : 0;
+    
+    if (cp > p && p > 0) {
+        document.getElementById('vpSaleBadge').style.display = 'block';
+    } else {
+        document.getElementById('vpSaleBadge').style.display = 'none';
+    }
+}
 
 document.getElementById('cancelProductBtn').addEventListener('click', () => {
     productsListView.classList.remove('hidden');
@@ -248,12 +265,18 @@ document.getElementById('saveProductBtn').addEventListener('click', async () => 
             imageUrl = await uploadImageToGithub(file);
         }
 
+        const comparePriceText = document.getElementById('vpComparePrice').innerText.trim().replace(/[^0-9.]/g, '');
+        const comparePrice = comparePriceText ? Number(comparePriceText) : null;
+        
+        const sizes = Array.from(document.querySelectorAll('#vpSizesContainer input[type="checkbox"]:checked')).map(cb => cb.value);
+
         const productData = {
             id: id || 'prod_' + Date.now().toString(36),
-            name: document.getElementById('vpName').innerText.trim(),
-            price: Number(document.getElementById('vpPrice').innerText.trim().replace(/[^0-9.]/g, '')),
+            name: document.getElementById('vpName').innerText.trim() || 'Untitled Product',
+            price: Number(document.getElementById('vpPrice').innerText.trim().replace(/[^0-9.]/g, '')) || 0,
+            compareAtPrice: comparePrice,
             category: document.getElementById('vpCategory').value,
-            sizes: document.getElementById('vpSizes').innerText.split(',').map(s => s.trim()).filter(s => s),
+            sizes: sizes,
             colors: document.getElementById('vpColors').innerText.split(',').map(c => c.trim()).filter(c => c),
             description: document.getElementById('vpDesc').innerText.trim(),
             visible: document.getElementById('vpVisible').checked,
@@ -292,13 +315,20 @@ function editProduct(id) {
         document.getElementById('vpId').value = p.id;
         document.getElementById('vpName').innerText = p.name;
         document.getElementById('vpPrice').innerText = p.price;
+        document.getElementById('vpComparePrice').innerText = p.compareAtPrice || '';
         document.getElementById('vpCategory').value = p.category;
-        document.getElementById('vpSizes').innerText = p.sizes.join(', ');
+        
+        document.querySelectorAll('#vpSizesContainer input[type="checkbox"]').forEach(cb => {
+            cb.checked = p.sizes && p.sizes.includes(cb.value);
+        });
+
         document.getElementById('vpColors').innerText = p.colors.join(', ');
         document.getElementById('vpDesc').innerText = p.description;
         document.getElementById('vpVisible').checked = p.visible;
         document.getElementById('vpImagePreview').src = p.imageUrl || '';
         document.getElementById('vpImageInput').value = '';
+        
+        updateSaleBadgePreview();
         
         productsListView.classList.add('hidden');
         productVisualEditor.classList.remove('hidden');
