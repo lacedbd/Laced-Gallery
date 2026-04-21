@@ -210,7 +210,7 @@ document.getElementById('cancelProductBtn').addEventListener('click', () => {
 });
 
 async function loadProducts() {
-    productsTableBody.innerHTML = '<tr><td colspan="5">Loading products...</td></tr>';
+    productsTableBody.innerHTML = '<tr><td colspan="6">Loading products...</td></tr>';
     try {
         const fileData = await getJsonFile('data/products.json');
         productsCache = fileData.content || [];
@@ -219,7 +219,7 @@ async function loadProducts() {
         productsTableBody.innerHTML = '';
         
         if (productsCache.length === 0) {
-            productsTableBody.innerHTML = '<tr><td colspan="5">No products found.</td></tr>';
+            productsTableBody.innerHTML = '<tr><td colspan="6">No products found.</td></tr>';
             return;
         }
 
@@ -229,6 +229,7 @@ async function loadProducts() {
                 <td><img src="${p.imageUrl || ''}" alt="product"></td>
                 <td><strong>${p.name}</strong><br><small>${p.category}</small></td>
                 <td>Tk ${p.price}</td>
+                <td>${p.stock !== undefined ? p.stock : 10}</td>
                 <td>${p.visible ? '<span style="color:green">Visible</span>' : '<span style="color:red">Hidden</span>'}</td>
                 <td>
                     <button class="action-btn edit-btn" data-id="${p.id}">Edit</button>
@@ -249,7 +250,7 @@ async function loadProducts() {
 
     } catch (error) {
         console.error("Error loading products:", error);
-        productsTableBody.innerHTML = '<tr><td colspan="5">Error loading products. Check console.</td></tr>';
+        productsTableBody.innerHTML = '<tr><td colspan="6">Error loading products. Check console.</td></tr>';
     }
     }
 }
