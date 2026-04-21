@@ -3,7 +3,7 @@
 export const CONFIG = {
     githubUsername: 'lacedbd',
     githubRepo: 'Laced-Gallery',
-    web3formsKey: 'YOUR_WEB3FORMS_ACCESS_KEY' // We will get this next!
+    web3formsKey: '5ecffbfe-1582-4817-8cd5-30afe0142379'
 };
 
 // Helper function to get the raw URL of your JSON database files
