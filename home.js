@@ -85,4 +85,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const products = await response.json();
             renderProducts(products);
         }
+    } catch (err) {
+        console.error("Error fetching products", err);
+    }
+});
 
