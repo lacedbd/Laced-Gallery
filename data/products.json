@@ -81,5 +81,17 @@
     "description": "Take your style to new heights. The Platform Elevate features a double-stacked rubber sole for added lift and a bold, modern aesthetic.",
     "visible": true,
     "imageUrl": "platform.png"
+  },
+  {
+    "id": "prod_mo98sggx",
+    "name": "JHFJYF",
+    "price": 0,
+    "compareAtPrice": null,
+    "category": "high",
+    "sizes": [],
+    "colors": [],
+    "description": "",
+    "visible": true,
+    "imageUrl": "https://raw.githubusercontent.com/lacedbd/Laced-Gallery/main/data/images/1776813343179_Screenshot 2026-04-22 at 12.09.09 AM.png"
   }
 ]
