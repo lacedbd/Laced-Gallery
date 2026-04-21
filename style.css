@@ -161,13 +161,13 @@ a {
     position: relative;
 }
 
-/* Adding a subtle gradient so white text/buttons pop if image is bright */
+/* Adding a strong gradient so white text/buttons pop if image is bright */
 .hero::after {
     content: '';
     position: absolute;
     bottom: 0; left: 0; right: 0;
-    height: 50%;
-    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+    height: 80%;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
     z-index: 1;
 }
 
@@ -184,6 +184,7 @@ a {
     line-height: 0.9;
     margin-bottom: 1rem;
     letter-spacing: -2px;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.7);
 }
 
 .hero p {
