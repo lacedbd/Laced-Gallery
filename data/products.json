@@ -1,22 +1,50 @@
 [
   {
-    "id": "prod_mo96iyos",
-    "name": "NEW SHOE NAME",
-    "price": 44,
+    "id": "prod_black_high",
+    "name": "Classic Black High Top",
+    "price": 7150,
+    "compareAtPrice": 8500,
     "category": "high",
-    "sizes": [
-      "7",
-      "8",
-      "9",
-      "10",
-      "11"
-    ],
-    "colors": [
-      "#000000",
-      "#ffffff"
-    ],
-    "description": "Enter description here. A timeless classic redesigned for the modern street.",
-    "visible": false,
-    "imageUrl": "https://raw.githubusercontent.com/lacedbd/Laced-Gallery/main/data/images/1776809541029_Screenshot 2026-04-22 at 12.09.16 AM.png"
+    "sizes": ["7", "8", "9", "10", "11"],
+    "colors": ["#000000", "#ffffff"],
+    "description": "The iconic high top silhouette in timeless black canvas. A staple for any wardrobe, offering durable comfort and classic street style.",
+    "visible": true,
+    "imageUrl": "black-high.png"
+  },
+  {
+    "id": "prod_white_low",
+    "name": "Classic White Low Top",
+    "price": 6600,
+    "compareAtPrice": null,
+    "category": "low",
+    "sizes": ["6", "7", "8", "9", "10"],
+    "colors": ["#ffffff", "#f0f0f0"],
+    "description": "Clean, crisp, and ready for summer. The classic white low top features a breathable canvas upper and the signature rubber toe cap.",
+    "visible": true,
+    "imageUrl": "white-low.png"
+  },
+  {
+    "id": "prod_color_drops",
+    "name": "Color Drops Edition",
+    "price": 7700,
+    "compareAtPrice": 9000,
+    "category": "high",
+    "sizes": ["8", "9", "10", "11"],
+    "colors": ["#1e3a8a", "#dc2626", "#16a34a"],
+    "description": "Make a statement with our vibrant Color Drops collection. Featuring bold primary colors and premium stitching for a standout look.",
+    "visible": true,
+    "imageUrl": "color-drops.png"
+  },
+  {
+    "id": "prod_platform",
+    "name": "Platform Elevate",
+    "price": 9350,
+    "compareAtPrice": 10500,
+    "category": "low",
+    "sizes": ["6", "7", "8", "9"],
+    "colors": ["#ffffff", "#000000"],
+    "description": "Take your style to new heights. The Platform Elevate features a double-stacked rubber sole for added lift and a bold, modern aesthetic.",
+    "visible": true,
+    "imageUrl": "platform.png"
   }
 ]
