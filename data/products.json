@@ -1,6 +1,6 @@
 [
   {
-    "id": "prod_black_high",
+    "id": "black-high",
     "name": "Classic Black High Top",
     "price": 7150,
     "compareAtPrice": 8500,
@@ -12,7 +12,7 @@
     "imageUrl": "black-high.png"
   },
   {
-    "id": "prod_white_low",
+    "id": "white-low",
     "name": "Classic White Low Top",
     "price": 6600,
     "compareAtPrice": null,
@@ -24,7 +24,7 @@
     "imageUrl": "white-low.png"
   },
   {
-    "id": "prod_color_drops",
+    "id": "color-drops",
     "name": "Color Drops Edition",
     "price": 7700,
     "compareAtPrice": 9000,
@@ -36,7 +36,7 @@
     "imageUrl": "color-drops.png"
   },
   {
-    "id": "prod_platform",
+    "id": "platform",
     "name": "Platform Elevate",
     "price": 9350,
     "compareAtPrice": 10500,
