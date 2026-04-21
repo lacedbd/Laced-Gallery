@@ -4,7 +4,22 @@ import { getRawDataUrl } from './config.js';
 function renderSettings(s) {
     if (s.heroHeadline) document.querySelector('.hero h1').textContent = s.heroHeadline;
     if (s.heroSubtext) document.querySelector('.hero p').textContent = s.heroSubtext;
-    if (s.heroImageUrl) document.querySelector('.hero').style.backgroundImage = `url('${s.heroImageUrl}')`;
+    
+    const hero = document.querySelector('.hero');
+    if (s.heroImages && s.heroImages.length > 0) {
+        hero.style.backgroundImage = `url('${s.heroImages[0]}')`;
+        hero.style.transition = 'background-image 1s ease-in-out';
+        
+        if (s.heroImages.length > 1) {
+            let currentIdx = 0;
+            setInterval(() => {
+                currentIdx = (currentIdx + 1) % s.heroImages.length;
+                hero.style.backgroundImage = `url('${s.heroImages[currentIdx]}')`;
+            }, 5000);
+        }
+    } else if (s.heroImageUrl) {
+        hero.style.backgroundImage = `url('${s.heroImageUrl}')`;
+    }
     
     const promoBar = document.querySelector('.promo-bar');
     if (s.promoEnabled) {

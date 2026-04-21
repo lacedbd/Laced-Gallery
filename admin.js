@@ -372,9 +372,13 @@ changeHeroImageBtn.addEventListener('click', () => {
 });
 
 heroImageInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        heroVisualSection.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
+    const files = e.target.files;
+    if (files.length > 0) {
+        heroVisualSection.style.backgroundImage = `url('${URL.createObjectURL(files[0])}')`;
+        if (files.length > 1) {
+            settingsStatus.textContent = `${files.length} images selected for slideshow!`;
+            settingsStatus.style.color = "blue";
+        }
     }
 });
 
@@ -392,7 +396,11 @@ async function loadSettings() {
         promoBarVisualContainer.style.display = isPromoEnabled ? 'block' : 'none';
         
         if (currentSettingsState.promoText) promoTextVisual.innerText = currentSettingsState.promoText;
-        if (currentSettingsState.heroImageUrl) heroVisualSection.style.backgroundImage = `url('${currentSettingsState.heroImageUrl}')`;
+        if (currentSettingsState.heroImages && currentSettingsState.heroImages.length > 0) {
+            heroVisualSection.style.backgroundImage = `url('${currentSettingsState.heroImages[0]}')`;
+        } else if (currentSettingsState.heroImageUrl) {
+            heroVisualSection.style.backgroundImage = `url('${currentSettingsState.heroImageUrl}')`;
+        }
 
     } catch (error) {
         console.error("Error loading settings:", error);
@@ -404,11 +412,18 @@ saveSettingsBtn.addEventListener('click', async () => {
     saveSettingsBtn.disabled = true;
     
     try {
-        const file = heroImageInput.files[0];
-        let heroImageUrl = currentSettingsState.heroImageUrl || '';
+        const files = heroImageInput.files;
+        let heroImages = currentSettingsState.heroImages || [];
+        
+        if (heroImages.length === 0 && currentSettingsState.heroImageUrl) {
+            heroImages = [currentSettingsState.heroImageUrl];
+        }
 
-        if (file) {
-            heroImageUrl = await uploadImageToGithub(file);
+        if (files.length > 0) {
+            heroImages = [];
+            for (let i = 0; i < files.length; i++) {
+                heroImages.push(await uploadImageToGithub(files[i]));
+            }
         }
 
         const newSettings = {
@@ -416,7 +431,7 @@ saveSettingsBtn.addEventListener('click', async () => {
             heroSubtext: heroSubtextVisual.innerText.trim(),
             promoEnabled: promoEnabledVisual.checked,
             promoText: promoTextVisual.innerText.trim(),
-            heroImageUrl: heroImageUrl
+            heroImages: heroImages
         };
 
         currentSettingsState = newSettings;

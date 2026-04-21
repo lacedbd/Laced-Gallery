@@ -751,4 +751,14 @@ footer {
     .checkout-container {
         grid-template-columns: 1fr;
     }
+    .hero-buttons {
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+    }
+    .hero-buttons .btn {
+        flex: 1;
+        padding: 0.8rem 0.5rem;
+        font-size: 0.9rem;
+        text-align: center;
+    }
 }
