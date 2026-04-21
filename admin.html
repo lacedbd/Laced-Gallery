@@ -53,27 +53,96 @@
         <main class="main-content" id="mainContentArea">
             
             <!-- PRODUCTS TAB -->
-            <section id="productsTab" class="tab-content">
-                <div class="header-flex">
-                    <h2>Manage Products</h2>
-                    <button id="openAddProductBtn" class="btn-primary">+ Add Product</button>
-                </div>
+            <section id="productsTab" class="tab-content" style="padding:0; background: #fff;">
                 
-                <div class="table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Image</th>
-                                <th>Product Details</th>
-                                <th>Price</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productsTableBody">
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
+                <!-- LIST VIEW -->
+                <div id="productsListView" style="padding: 2rem 3rem;">
+                    <div class="header-flex">
+                        <h2>Manage Products</h2>
+                        <button id="openAddProductBtn" class="btn-primary">+ Add Product</button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Product Details</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- VISUAL EDITOR VIEW -->
+                <div id="productVisualEditor" class="hidden">
+                    <div class="editor-toolbar">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <h2>Visual Product Editor</h2>
+                            <span id="productStatus" class="status-msg" style="margin-top:0;"></span>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <label style="margin-right: 15px; font-weight: 600; cursor: pointer;">
+                                <input type="checkbox" id="vpVisible" checked> Visible on Store
+                            </label>
+                            <select id="vpCategory" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-family: inherit;">
+                                <option value="high">High Tops</option>
+                                <option value="low">Low Tops</option>
+                            </select>
+                            <button id="cancelProductBtn" class="btn-primary" style="background: #ccc; color: #333;">Cancel</button>
+                            <button id="saveProductBtn" class="btn-primary">Publish Product</button>
+                        </div>
+                    </div>
+
+                    <div class="visual-canvas" style="background: var(--bg-color);">
+                        <p style="text-align: center; font-size: 0.8rem; color: #888; padding: 10px;">Click elements below to edit them directly.</p>
+                        
+                        <div class="product-page" style="padding: 2rem 5%; max-width: 1200px; margin: 0 auto;">
+                            <input type="hidden" id="vpId">
+                            <div class="product-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;">
+                                
+                                <div class="product-gallery" style="background: #f8f9fa; padding: 2rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; min-height: 400px;">
+                                    <div class="hero-edit-overlay" style="top: 10px; right: 10px;">
+                                        <button id="changeProductImageBtn" class="btn-primary" style="background: rgba(0,0,0,0.8); border: 1px solid #fff;">Change Image</button>
+                                        <input type="file" id="vpImageInput" accept="image/*" class="hidden">
+                                    </div>
+                                    <div class="main-image-wrapper">
+                                        <img id="vpImagePreview" src="" alt="Product Preview" style="width: 100%; max-width: 500px; height: auto;">
+                                    </div>
+                                </div>
+                                
+                                <div class="product-details">
+                                    <h1 contenteditable="true" id="vpName" class="editable-element" style="font-family: 'Montserrat', sans-serif; font-size: 2.5rem; margin-bottom: 0.5rem; display: inline-block;">New Shoe Name</h1>
+                                    
+                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+                                        <span style="font-size: 1.5rem; font-weight: 600;">Tk</span>
+                                        <span contenteditable="true" id="vpPrice" class="editable-element" style="font-size: 1.5rem; font-weight: 600; min-width: 50px;">0</span>
+                                    </div>
+
+                                    <p contenteditable="true" id="vpDesc" class="editable-element product-description" style="color: #666; margin-bottom: 2rem; line-height: 1.6;">Enter description here. A timeless classic redesigned for the modern street.</p>
+                                    
+                                    <div class="selector-section" style="margin-bottom: 1.5rem;">
+                                        <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Colors (Hex Codes)</h3>
+                                        <div contenteditable="true" id="vpColors" class="editable-element" style="padding: 10px; border: 1px dashed #ccc; border-radius: 4px; color: #555;">#000000, #ffffff</div>
+                                    </div>
+
+                                    <div class="selector-section" style="margin-bottom: 1.5rem;">
+                                        <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Sizes (Comma Separated)</h3>
+                                        <div contenteditable="true" id="vpSizes" class="editable-element" style="padding: 10px; border: 1px dashed #ccc; border-radius: 4px; color: #555;">7, 8, 9, 10, 11</div>
+                                    </div>
+                                    
+                                    <button class="btn-pill add-to-cart-btn" style="opacity:0.5; cursor:not-allowed;">Preview Add to Cart</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -121,56 +190,6 @@
             </section>
 
         </main>
-    </div>
-
-    <!-- ADD PRODUCT MODAL -->
-    <div id="productModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Add Product</h3>
-                <button id="closeModalBtn" class="close-btn">&times;</button>
-            </div>
-            <form id="productForm">
-                <input type="hidden" id="productId">
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" id="pName" required>
-                </div>
-                <div class="form-group">
-                    <label>Price (Tk)</label>
-                    <input type="number" id="pPrice" required>
-                </div>
-                <div class="form-group">
-                    <label>Category</label>
-                    <select id="pCategory">
-                        <option value="high">High Tops</option>
-                        <option value="low">Low Tops</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Sizes (comma separated)</label>
-                    <input type="text" id="pSizes" placeholder="e.g. 7, 8, 9, 10" required>
-                </div>
-                <div class="form-group">
-                    <label>Colors (comma separated Hex Codes)</label>
-                    <input type="text" id="pColors" placeholder="e.g. #000000, #ffffff" required>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="pDesc" rows="3" required></textarea>
-                </div>
-                <div class="form-group row-group">
-                    <label>Visible on Store</label>
-                    <input type="checkbox" id="pVisible" checked>
-                </div>
-                <div class="form-group">
-                    <label>Product Image</label>
-                    <input type="file" id="pImageInput" accept="image/*">
-                    <small>Required for new products. Leave blank to keep existing.</small>
-                </div>
-                <button type="submit" id="saveProductBtn" class="btn-primary">Save Product</button>
-            </form>
-        </div>
     </div>
 
     <script type="module" src="admin.js"></script>

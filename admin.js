@@ -151,21 +151,45 @@ function loadDashboardData() {
 }
 
 // =========================================================
-// PRODUCT MANAGEMENT
+// PRODUCT MANAGEMENT (VISUAL EDITOR)
 // =========================================================
 const productsTableBody = document.getElementById('productsTableBody');
-const productModal = document.getElementById('productModal');
-const productForm = document.getElementById('productForm');
+const productsListView = document.getElementById('productsListView');
+const productVisualEditor = document.getElementById('productVisualEditor');
 
-document.getElementById('openAddProductBtn').addEventListener('click', () => {
-    productForm.reset();
-    document.getElementById('productId').value = '';
-    document.getElementById('modalTitle').textContent = 'Add Product';
-    productModal.classList.remove('hidden');
+const vpImageInput = document.getElementById('vpImageInput');
+const vpImagePreview = document.getElementById('vpImagePreview');
+
+document.getElementById('changeProductImageBtn').addEventListener('click', () => {
+    vpImageInput.click();
 });
 
-document.getElementById('closeModalBtn').addEventListener('click', () => {
-    productModal.classList.add('hidden');
+vpImageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        vpImagePreview.src = URL.createObjectURL(file);
+    }
+});
+
+document.getElementById('openAddProductBtn').addEventListener('click', () => {
+    document.getElementById('vpId').value = '';
+    document.getElementById('vpName').innerText = 'New Shoe Name';
+    document.getElementById('vpPrice').innerText = '0';
+    document.getElementById('vpCategory').value = 'high';
+    document.getElementById('vpSizes').innerText = '7, 8, 9, 10, 11';
+    document.getElementById('vpColors').innerText = '#000000, #ffffff';
+    document.getElementById('vpDesc').innerText = 'Enter description here. A timeless classic redesigned for the modern street.';
+    document.getElementById('vpVisible').checked = true;
+    document.getElementById('vpImagePreview').src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // Transparent placeholder
+    document.getElementById('vpImageInput').value = '';
+    
+    productsListView.classList.add('hidden');
+    productVisualEditor.classList.remove('hidden');
+});
+
+document.getElementById('cancelProductBtn').addEventListener('click', () => {
+    productsListView.classList.remove('hidden');
+    productVisualEditor.classList.add('hidden');
 });
 
 async function loadProducts() {
@@ -210,15 +234,14 @@ async function loadProducts() {
     }
 }
 
-productForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+document.getElementById('saveProductBtn').addEventListener('click', async () => {
     const btn = document.getElementById('saveProductBtn');
-    btn.textContent = 'Saving...';
+    btn.textContent = 'Publishing...';
     btn.disabled = true;
 
     try {
-        const id = document.getElementById('productId').value;
-        const file = document.getElementById('pImageInput').files[0];
+        const id = document.getElementById('vpId').value;
+        const file = document.getElementById('vpImageInput').files[0];
         
         let imageUrl = '';
         if (file) {
@@ -227,13 +250,13 @@ productForm.addEventListener('submit', async (e) => {
 
         const productData = {
             id: id || 'prod_' + Date.now().toString(36),
-            name: document.getElementById('pName').value,
-            price: Number(document.getElementById('pPrice').value),
-            category: document.getElementById('pCategory').value,
-            sizes: document.getElementById('pSizes').value.split(',').map(s => s.trim()),
-            colors: document.getElementById('pColors').value.split(',').map(c => c.trim()),
-            description: document.getElementById('pDesc').value,
-            visible: document.getElementById('pVisible').checked,
+            name: document.getElementById('vpName').innerText.trim(),
+            price: Number(document.getElementById('vpPrice').innerText.trim().replace(/[^0-9.]/g, '')),
+            category: document.getElementById('vpCategory').value,
+            sizes: document.getElementById('vpSizes').innerText.split(',').map(s => s.trim()).filter(s => s),
+            colors: document.getElementById('vpColors').innerText.split(',').map(c => c.trim()).filter(c => c),
+            description: document.getElementById('vpDesc').innerText.trim(),
+            visible: document.getElementById('vpVisible').checked,
         };
 
         if (id) {
@@ -244,20 +267,21 @@ productForm.addEventListener('submit', async (e) => {
                 productsCache[index] = productData;
             }
         } else {
-            if (!imageUrl) throw new Error("Image is required for new products");
+            if (!imageUrl) throw new Error("Image is required for new products. Please click Change Image.");
             productData.imageUrl = imageUrl;
             productsCache.push(productData);
         }
 
         currentProductsSha = await saveJsonFile('data/products.json', productsCache, currentProductsSha, `Update product ${productData.name}`);
 
-        productModal.classList.add('hidden');
+        productsListView.classList.remove('hidden');
+        productVisualEditor.classList.add('hidden');
         loadProducts();
     } catch (error) {
         console.error("Error saving product:", error);
         alert(error.message);
     } finally {
-        btn.textContent = 'Save Product';
+        btn.textContent = 'Publish Product';
         btn.disabled = false;
     }
 });
@@ -265,17 +289,19 @@ productForm.addEventListener('submit', async (e) => {
 function editProduct(id) {
     const p = productsCache.find(prod => prod.id === id);
     if (p) {
-        document.getElementById('productId').value = p.id;
-        document.getElementById('pName').value = p.name;
-        document.getElementById('pPrice').value = p.price;
-        document.getElementById('pCategory').value = p.category;
-        document.getElementById('pSizes').value = p.sizes.join(', ');
-        document.getElementById('pColors').value = p.colors.join(', ');
-        document.getElementById('pDesc').value = p.description;
-        document.getElementById('pVisible').checked = p.visible;
+        document.getElementById('vpId').value = p.id;
+        document.getElementById('vpName').innerText = p.name;
+        document.getElementById('vpPrice').innerText = p.price;
+        document.getElementById('vpCategory').value = p.category;
+        document.getElementById('vpSizes').innerText = p.sizes.join(', ');
+        document.getElementById('vpColors').innerText = p.colors.join(', ');
+        document.getElementById('vpDesc').innerText = p.description;
+        document.getElementById('vpVisible').checked = p.visible;
+        document.getElementById('vpImagePreview').src = p.imageUrl || '';
+        document.getElementById('vpImageInput').value = '';
         
-        document.getElementById('modalTitle').textContent = 'Edit Product';
-        productModal.classList.remove('hidden');
+        productsListView.classList.add('hidden');
+        productVisualEditor.classList.remove('hidden');
     }
 }
 
@@ -296,8 +322,6 @@ async function deleteProduct(id) {
 // =========================================================
 // HOMEPAGE VISUAL EDITOR
 // =========================================================
-
-// Elements
 const heroHeadlineVisual = document.getElementById('heroHeadlineVisual');
 const heroSubtextVisual = document.getElementById('heroSubtextVisual');
 const promoEnabledVisual = document.getElementById('promoEnabledVisual');
@@ -309,7 +333,6 @@ const heroImageInput = document.getElementById('heroImageInput');
 const saveSettingsBtn = document.getElementById('saveSettingsBtn');
 const settingsStatus = document.getElementById('settingsStatus');
 
-// Interaction
 promoEnabledVisual.addEventListener('change', (e) => {
     promoBarVisualContainer.style.display = e.target.checked ? 'block' : 'none';
 });
@@ -325,7 +348,6 @@ heroImageInput.addEventListener('change', (e) => {
     }
 });
 
-// Load
 async function loadSettings() {
     try {
         const fileData = await getJsonFile('data/settings.json');
@@ -347,7 +369,6 @@ async function loadSettings() {
     }
 }
 
-// Save
 saveSettingsBtn.addEventListener('click', async () => {
     saveSettingsBtn.textContent = 'Saving...';
     saveSettingsBtn.disabled = true;

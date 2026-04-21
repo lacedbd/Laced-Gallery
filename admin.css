@@ -101,8 +101,4 @@ td img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; backg
 hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 .status-msg { margin-top: 1rem; font-size: 0.9rem; color: green; }
 
-/* Modal */
-.modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-.modal-content { background: #fff; width: 100%; max-width: 500px; border-radius: 8px; padding: 2rem; max-height: 90vh; overflow-y: auto; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+
