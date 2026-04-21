@@ -1,0 +1,22 @@
+[
+  {
+    "id": "prod_mo96iyos",
+    "name": "NEW SHOE NAME",
+    "price": 44,
+    "category": "high",
+    "sizes": [
+      "7",
+      "8",
+      "9",
+      "10",
+      "11"
+    ],
+    "colors": [
+      "#000000",
+      "#ffffff"
+    ],
+    "description": "Enter description here. A timeless classic redesigned for the modern street.",
+    "visible": false,
+    "imageUrl": "https://raw.githubusercontent.com/lacedbd/Laced-Gallery/main/data/images/1776809541029_Screenshot 2026-04-22 at 12.09.16 AM.png"
+  }
+]
