@@ -790,13 +790,21 @@ footer {
 /* Grid View Toggle */
 @media (max-width: 768px) {
     .grid.grid-view-active {
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+    }
+    .grid.grid-view-active .grid-item {
+        padding: 1rem !important;
     }
     .grid.grid-view-active .grid-item h3 {
-        font-size: 0.9rem;
+        font-size: 0.9rem !important;
+        margin-bottom: 0.2rem !important;
     }
     .grid.grid-view-active .grid-item p {
-        font-size: 0.8rem;
+        font-size: 0.8rem !important;
+    }
+    .grid.grid-view-active .sale-badge {
+        font-size: 0.6rem !important;
+        padding: 2px 6px !important;
     }
 }

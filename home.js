@@ -106,17 +106,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Error fetching products", err);
     }
 
-    const toggleBtn = document.getElementById('toggleGridViewBtn');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
+    const singleViewBtn = document.getElementById('singleViewBtn');
+    const gridViewBtn = document.getElementById('gridViewBtn');
+    if (singleViewBtn && gridViewBtn) {
+        singleViewBtn.addEventListener('click', () => {
             const grid = document.querySelector('.grid');
             if (grid) {
-                grid.classList.toggle('grid-view-active');
-                if (grid.classList.contains('grid-view-active')) {
-                    toggleBtn.textContent = 'List View';
-                } else {
-                    toggleBtn.textContent = 'Grid View';
-                }
+                grid.classList.remove('grid-view-active');
+                singleViewBtn.style.opacity = '1';
+                gridViewBtn.style.opacity = '0.3';
+            }
+        });
+        gridViewBtn.addEventListener('click', () => {
+            const grid = document.querySelector('.grid');
+            if (grid) {
+                grid.classList.add('grid-view-active');
+                gridViewBtn.style.opacity = '1';
+                singleViewBtn.style.opacity = '0.3';
             }
         });
     }
