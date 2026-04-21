@@ -1,0 +1,362 @@
+import { CONFIG } from './config.js';
+
+// DOM Elements
+const loginScreen = document.getElementById('loginScreen');
+const dashboard = document.getElementById('dashboard');
+const loginForm = document.getElementById('loginForm');
+const loginError = document.getElementById('loginError');
+const logoutBtn = document.getElementById('logoutBtn');
+
+const GITHUB_API_BASE = `https://api.github.com/repos/${CONFIG.githubUsername}/${CONFIG.githubRepo}/contents`;
+let githubToken = localStorage.getItem('laced_github_token') || '';
+
+let currentSettingsSha = null;
+let currentProductsSha = null;
+let productsCache = [];
+
+// =========================================================
+// GITHUB API HELPERS
+// =========================================================
+async function githubApiRequest(path, method = 'GET', body = null) {
+    if (!githubToken) throw new Error("Not authenticated");
+    
+    const headers = {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json'
+    };
+
+    const options = { method, headers };
+    if (body) {
+        options.body = JSON.stringify(body);
+    }
+
+    const url = `${GITHUB_API_BASE}/${path}${method === 'GET' ? `?t=${Date.now()}` : ''}`;
+    
+    const res = await fetch(url, options);
+    if (!res.ok) {
+        if (res.status === 404 && method === 'GET') return null;
+        const err = await res.json();
+        throw new Error(err.message || "GitHub API Error");
+    }
+    return await res.json();
+}
+
+async function getJsonFile(path) {
+    const data = await githubApiRequest(path);
+    if (!data) return { content: null, sha: null };
+    // Handle UTF-8 safely
+    const decoded = decodeURIComponent(escape(atob(data.content)));
+    return { content: JSON.parse(decoded), sha: data.sha };
+}
+
+async function saveJsonFile(path, jsonContent, existingSha = null, message = "Update JSON") {
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(jsonContent, null, 2))));
+    const body = {
+        message: message,
+        content: encoded,
+    };
+    if (existingSha) body.sha = existingSha;
+    const res = await githubApiRequest(path, 'PUT', body);
+    return res.content.sha;
+}
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            const b64 = reader.result.split(',')[1];
+            resolve(b64);
+        };
+        reader.onerror = error => reject(error);
+    });
+}
+
+async function uploadImageToGithub(file) {
+    const base64Content = await fileToBase64(file);
+    const filename = `data/images/${Date.now()}_${file.name}`;
+    const body = {
+        message: `Upload ${file.name}`,
+        content: base64Content
+    };
+    const res = await githubApiRequest(filename, 'PUT', body);
+    return res.content.download_url;
+}
+
+// =========================================================
+// INIT & AUTH
+// =========================================================
+async function checkAuthAndLoad() {
+    if (githubToken) {
+        try {
+            // Test token by trying to fetch the repo details
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.githubUsername}/${CONFIG.githubRepo}`, {
+                headers: { 'Authorization': `token ${githubToken}` }
+            });
+            if (!res.ok) throw new Error("Invalid token or repo");
+
+            loginScreen.classList.add('hidden');
+            dashboard.classList.remove('hidden');
+            loadDashboardData();
+        } catch (err) {
+            console.error(err);
+            githubToken = '';
+            localStorage.removeItem('laced_github_token');
+            loginScreen.classList.remove('hidden');
+            dashboard.classList.add('hidden');
+        }
+    } else {
+        loginScreen.classList.remove('hidden');
+        dashboard.classList.add('hidden');
+    }
+}
+
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const token = document.getElementById('githubToken').value.trim();
+    const btn = document.getElementById('loginBtn');
+    
+    try {
+        btn.textContent = 'Connecting...';
+        githubToken = token;
+        localStorage.setItem('laced_github_token', token);
+        await checkAuthAndLoad();
+    } catch (error) {
+        loginError.textContent = "Connection failed. Check token and config.js.";
+    } finally {
+        btn.textContent = 'Connect to GitHub';
+    }
+});
+
+logoutBtn.addEventListener('click', () => {
+    githubToken = '';
+    localStorage.removeItem('laced_github_token');
+    window.location.reload();
+});
+
+// Sidebar Tab Switching
+document.querySelectorAll('.nav-btn').forEach(btn => {
+    if(btn.id === 'logoutBtn') return;
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+        
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab + 'Tab').classList.remove('hidden');
+    });
+});
+
+function loadDashboardData() {
+    loadProducts();
+    loadSettings();
+}
+
+// =========================================================
+// PRODUCT MANAGEMENT
+// =========================================================
+const productsTableBody = document.getElementById('productsTableBody');
+const productModal = document.getElementById('productModal');
+const productForm = document.getElementById('productForm');
+
+document.getElementById('openAddProductBtn').addEventListener('click', () => {
+    productForm.reset();
+    document.getElementById('productId').value = '';
+    document.getElementById('modalTitle').textContent = 'Add Product';
+    productModal.classList.remove('hidden');
+});
+
+document.getElementById('closeModalBtn').addEventListener('click', () => {
+    productModal.classList.add('hidden');
+});
+
+async function loadProducts() {
+    productsTableBody.innerHTML = '<tr><td colspan="5">Loading products...</td></tr>';
+    try {
+        const fileData = await getJsonFile('data/products.json');
+        productsCache = fileData.content || [];
+        currentProductsSha = fileData.sha;
+
+        productsTableBody.innerHTML = '';
+        
+        if (productsCache.length === 0) {
+            productsTableBody.innerHTML = '<tr><td colspan="5">No products found.</td></tr>';
+            return;
+        }
+
+        productsCache.forEach((p) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><img src="${p.imageUrl || ''}" alt="product"></td>
+                <td><strong>${p.name}</strong><br><small>${p.category}</small></td>
+                <td>Tk ${p.price}</td>
+                <td>${p.visible ? '<span style="color:green">Visible</span>' : '<span style="color:red">Hidden</span>'}</td>
+                <td>
+                    <button class="action-btn edit-btn" data-id="${p.id}">Edit</button>
+                    <button class="action-btn delete-btn" data-id="${p.id}" style="color:red">Delete</button>
+                </td>
+            `;
+            productsTableBody.appendChild(tr);
+        });
+
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => editProduct(e.target.dataset.id));
+        });
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => deleteProduct(e.target.dataset.id));
+        });
+
+    } catch (error) {
+        console.error("Error loading products:", error);
+        productsTableBody.innerHTML = '<tr><td colspan="5">Error loading products. Check console.</td></tr>';
+    }
+}
+
+productForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('saveProductBtn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    try {
+        const id = document.getElementById('productId').value;
+        const file = document.getElementById('pImageInput').files[0];
+        
+        let imageUrl = '';
+        if (file) {
+            imageUrl = await uploadImageToGithub(file);
+        }
+
+        const productData = {
+            id: id || 'prod_' + Date.now().toString(36),
+            name: document.getElementById('pName').value,
+            price: Number(document.getElementById('pPrice').value),
+            category: document.getElementById('pCategory').value,
+            sizes: document.getElementById('pSizes').value.split(',').map(s => s.trim()),
+            colors: document.getElementById('pColors').value.split(',').map(c => c.trim()),
+            description: document.getElementById('pDesc').value,
+            visible: document.getElementById('pVisible').checked,
+        };
+
+        if (id) {
+            // Update existing
+            const index = productsCache.findIndex(p => p.id === id);
+            if(index !== -1) {
+                if (imageUrl) productData.imageUrl = imageUrl; 
+                else productData.imageUrl = productsCache[index].imageUrl; // keep old
+                productsCache[index] = productData;
+            }
+        } else {
+            // Add new
+            if (!imageUrl) throw new Error("Image is required for new products");
+            productData.imageUrl = imageUrl;
+            productsCache.push(productData);
+        }
+
+        // Save back to GitHub
+        currentProductsSha = await saveJsonFile('data/products.json', productsCache, currentProductsSha, `Update product ${productData.name}`);
+
+        productModal.classList.add('hidden');
+        loadProducts();
+    } catch (error) {
+        console.error("Error saving product:", error);
+        alert(error.message);
+    } finally {
+        btn.textContent = 'Save Product';
+        btn.disabled = false;
+    }
+});
+
+function editProduct(id) {
+    const p = productsCache.find(prod => prod.id === id);
+    if (p) {
+        document.getElementById('productId').value = p.id;
+        document.getElementById('pName').value = p.name;
+        document.getElementById('pPrice').value = p.price;
+        document.getElementById('pCategory').value = p.category;
+        document.getElementById('pSizes').value = p.sizes.join(', ');
+        document.getElementById('pColors').value = p.colors.join(', ');
+        document.getElementById('pDesc').value = p.description;
+        document.getElementById('pVisible').checked = p.visible;
+        
+        document.getElementById('modalTitle').textContent = 'Edit Product';
+        productModal.classList.remove('hidden');
+    }
+}
+
+async function deleteProduct(id) {
+    if (confirm("Are you sure you want to delete this product?")) {
+        try {
+            const pName = productsCache.find(p => p.id === id)?.name || id;
+            productsCache = productsCache.filter(p => p.id !== id);
+            currentProductsSha = await saveJsonFile('data/products.json', productsCache, currentProductsSha, `Delete product ${pName}`);
+            loadProducts();
+        } catch (error) {
+            console.error("Error deleting product:", error);
+            alert("Error deleting product.");
+        }
+    }
+}
+
+// =========================================================
+// HOMEPAGE SETTINGS
+// =========================================================
+const settingsForm = document.getElementById('settingsForm');
+
+async function loadSettings() {
+    try {
+        const fileData = await getJsonFile('data/settings.json');
+        currentSettingsSha = fileData.sha;
+        const s = fileData.content || {};
+
+        document.getElementById('heroHeadline').value = s.heroHeadline || '';
+        document.getElementById('heroSubtext').value = s.heroSubtext || '';
+        document.getElementById('promoEnabled').checked = s.promoEnabled || false;
+        document.getElementById('promoText').value = s.promoText || '';
+    } catch (error) {
+        console.error("Error loading settings:", error);
+    }
+}
+
+settingsForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('saveSettingsBtn');
+    const statusMsg = document.getElementById('settingsStatus');
+    btn.textContent = 'Saving...';
+    
+    try {
+        const file = document.getElementById('heroImageInput').files[0];
+        let heroImageUrl = '';
+
+        if (file) {
+            heroImageUrl = await uploadImageToGithub(file);
+        }
+
+        // Fetch latest state to merge
+        const fileData = await getJsonFile('data/settings.json');
+        let currentSettings = fileData.content || {};
+        currentSettingsSha = fileData.sha;
+
+        currentSettings.heroHeadline = document.getElementById('heroHeadline').value;
+        currentSettings.heroSubtext = document.getElementById('heroSubtext').value;
+        currentSettings.promoEnabled = document.getElementById('promoEnabled').checked;
+        currentSettings.promoText = document.getElementById('promoText').value;
+
+        if (heroImageUrl) {
+            currentSettings.heroImageUrl = heroImageUrl;
+        }
+
+        currentSettingsSha = await saveJsonFile('data/settings.json', currentSettings, currentSettingsSha, "Update homepage settings");
+        
+        statusMsg.textContent = "Settings saved successfully!";
+        setTimeout(() => statusMsg.textContent = '', 3000);
+    } catch (error) {
+        console.error("Error saving settings:", error);
+        statusMsg.textContent = "Error saving settings.";
+        statusMsg.style.color = 'red';
+    } finally {
+        btn.textContent = 'Save Settings';
+    }
+});
+
+// Init
+checkAuthAndLoad();

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LACED | The Classics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Montserrat for heavy headings, Inter for body -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="index.html" class="logo">
+                <img src="logo.png" alt="LACED Logo" class="logo-img">
+            </a>
+        </div>
+        <div class="nav-right">
+            <button class="icon-btn" aria-label="Search">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+            <button class="icon-btn cart-icon-btn" aria-label="Cart" id="navCartBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span class="cart-badge" id="cartBadge">0</span>
+            </button>
+            <button class="menu-btn" aria-label="Menu">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </button>
+        </div>
+    </nav>
+
+    <div class="promo-bar">
+        <div class="marquee-content">
+            <span>Free shipping on all orders over Tk 5,500</span>
+            <span>Free shipping on all orders over Tk 5,500</span>
+            <span>Free shipping on all orders over Tk 5,500</span>
+            <span>Free shipping on all orders over Tk 5,500</span>
+            <span>Free shipping on all orders over Tk 5,500</span>
+            <span>Free shipping on all orders over Tk 5,500</span>
+            <span>Free shipping on all orders over Tk 5,500</span>
+            <span>Free shipping on all orders over Tk 5,500</span>
+        </div>
+    </div>
+
+    <main>
+        <section class="hero" style="background-image: url('hero.png');">
+            <div class="hero-content">
+                <h1>STAY LACED.</h1>
+                <p>Bold colors. Timeless silhouettes. Shop the new high and low collection.</p>
+                <div class="hero-buttons">
+                    <a href="product.html?id=black-high" class="btn btn-pill">Shop High Tops</a>
+                    <a href="product.html?id=white-low" class="btn btn-pill">Shop Low Tops</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="lineup">
+            <div class="section-header">
+                <h2>The Lineup</h2>
+                <p>Shop by silhouette</p>
+            </div>
+            
+            <div class="grid">
+                <a href="product.html?id=black-high" class="grid-item" data-color="#f8f9fa">
+                    <div class="img-wrapper">
+                        <img src="black-high.png" alt="Classic Black High Top">
+                    </div>
+                    <h3>Classic Black High</h3>
+                    <p>Tk 7,150</p>
+                </a>
+                <a href="product.html?id=white-low" class="grid-item" data-color="#f8f9fa">
+                    <div class="img-wrapper">
+                        <img src="white-low.png" alt="Classic White Low Top">
+                    </div>
+                    <h3>Classic White Low</h3>
+                    <p>Tk 6,600</p>
+                </a>
+                <a href="product.html?id=color-drops" class="grid-item" data-color="#eff6ff">
+                    <div class="img-wrapper">
+                        <img src="color-drops.png" alt="Color Drops">
+                    </div>
+                    <h3>Color Drops</h3>
+                    <p>Tk 7,700</p>
+                </a>
+                <a href="product.html?id=platform" class="grid-item" data-color="#f1f5f9">
+                    <div class="img-wrapper">
+                        <img src="platform.png" alt="Platform Editions">
+                    </div>
+                    <h3>Platform Editions</h3>
+                    <p>Tk 9,350</p>
+                </a>
+            </div>
+        </section>
+
+        <section class="trending">
+            <div class="section-header">
+                <h2>Trending</h2>
+                <p>On the street right now</p>
+            </div>
+            
+            <div class="trending-cards">
+                <div class="trend-card" style="background-image: url('trending-skate.png');">
+                    <div class="card-content">
+                        <h3>City Staples</h3>
+                        <a href="product.html?id=white-low" class="btn btn-pill">Shop Low</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 LACED. All rights reserved.</p>
+    </footer>
+
+    <!-- Cart Overlay & Drawer -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h2>Your Cart</h2>
+            <button class="close-cart" id="closeCartBtn">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItemsContainer">
+            <!-- Items injected by JS -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotalAmount">Tk 0</span>
+            </div>
+            <a href="checkout.html" class="btn-pill checkout-btn" id="checkoutBtn">Proceed to Checkout</a>
+        </div>
+    </div>
+
+    <script>
+        // Add subtle hover background color shifting to grid items
+        document.querySelectorAll('.grid-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = this.getAttribute('data-color');
+            });
+            item.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = 'transparent';
+            });
+        });
+
+        // Shrink navbar on scroll
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+    <script src="cart.js"></script>
+    <script type="module" src="home.js"></script>
+</body>
+</html>
