@@ -34,7 +34,8 @@ function renderProducts(products) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    let category = urlParams.get('category') || 'high'; // Default to high
+    let category = urlParams.get('category') || 'high';
+    let searchQuery = urlParams.get('q');
 
     const filterHighBtn = document.getElementById('filterHighTops');
     const filterLowBtn = document.getElementById('filterLowTops');
@@ -53,37 +54,62 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function updateView() {
-        // Update URL
-        const newUrl = window.location.pathname + '?category=' + category;
+        let newUrl = window.location.pathname;
+        if (searchQuery) {
+            newUrl += '?q=' + encodeURIComponent(searchQuery);
+        } else {
+            newUrl += '?category=' + category;
+        }
         window.history.replaceState(null, '', newUrl);
 
-        // Update toggle UI
-        if (category === 'high') {
-            filterHighBtn.style.background = '#000';
-            filterHighBtn.style.color = '#fff';
-            filterLowBtn.style.background = 'transparent';
-            filterLowBtn.style.color = '#000';
+        let filtered = [];
+
+        if (searchQuery) {
+            document.querySelector('.category-toggle').style.display = 'none';
+            document.querySelector('.section-header h2').textContent = `Search results for "${searchQuery}"`;
+            document.querySelector('.section-header p').textContent = '';
+            filtered = allProducts.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase()));
+            
+            if (filtered.length === 0) {
+                const grid = document.querySelector('.grid');
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center;">No products found matching "${searchQuery}".</p>`;
+                return;
+            }
         } else {
-            filterLowBtn.style.background = '#000';
-            filterLowBtn.style.color = '#fff';
-            filterHighBtn.style.background = 'transparent';
-            filterHighBtn.style.color = '#000';
+            document.querySelector('.category-toggle').style.display = 'flex';
+            document.querySelector('.section-header h2').textContent = 'Collection';
+            document.querySelector('.section-header p').textContent = 'Shop by silhouette';
+
+            if (category === 'high') {
+                filterHighBtn.style.background = '#000';
+                filterHighBtn.style.color = '#fff';
+                filterLowBtn.style.background = 'transparent';
+                filterLowBtn.style.color = '#000';
+            } else {
+                filterLowBtn.style.background = '#000';
+                filterLowBtn.style.color = '#fff';
+                filterHighBtn.style.background = 'transparent';
+                filterHighBtn.style.color = '#000';
+            }
+            filtered = allProducts.filter(p => p.category === category);
         }
 
-        // Render filtered products
-        const filtered = allProducts.filter(p => p.category === category);
         renderProducts(filtered);
     }
 
     filterHighBtn.addEventListener('click', () => {
+        searchQuery = null;
         category = 'high';
         updateView();
     });
 
     filterLowBtn.addEventListener('click', () => {
+        searchQuery = null;
         category = 'low';
         updateView();
     });
+
+
 
     // Grid View Toggle Logic (Reused from home.js)
     const singleViewBtn = document.getElementById('singleViewBtn');

@@ -50,7 +50,7 @@
     </div>
 
     <main>
-        <section class="lineup" style="padding-top: 8rem;">
+        <section class="lineup" style="padding-top: 4rem;">
             <div class="section-header">
                 <h2>Collection</h2>
                 <div class="category-toggle" style="margin: 2rem auto; display: flex; justify-content: center; background: #eee; border-radius: 30px; padding: 4px; max-width: 300px;">
@@ -102,6 +102,18 @@
         </div>
     </div>
 
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-container">
+            <button class="close-search" id="closeSearchBtn">&times;</button>
+            <h2 style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 2rem; margin-bottom: 1rem;">SEARCH</h2>
+            <form id="searchForm" action="collection.html" method="GET" style="display: flex; flex-direction: column; gap: 1rem;">
+                <input type="text" name="q" placeholder="What are you looking for?" style="width: 100%; padding: 15px 0; font-size: 1.5rem; border: none; border-bottom: 2px solid #000; background: transparent; outline: none;" autocomplete="off">
+                <button type="submit" class="btn-primary" style="align-self: flex-start;">Search</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Add subtle hover background color shifting to grid items
         document.querySelectorAll('.grid-item').forEach(item => {
@@ -124,6 +136,7 @@
         });
     </script>
     <script src="cart.js"></script>
+    <script src="search.js"></script>
     <script type="module" src="collection.js"></script>
 </body>
 </html>

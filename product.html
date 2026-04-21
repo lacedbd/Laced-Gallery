@@ -124,7 +124,20 @@
         </div>
     </div>
 
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-container">
+            <button class="close-search" id="closeSearchBtn">&times;</button>
+            <h2 style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 2rem; margin-bottom: 1rem;">SEARCH</h2>
+            <form id="searchForm" action="collection.html" method="GET" style="display: flex; flex-direction: column; gap: 1rem;">
+                <input type="text" name="q" placeholder="What are you looking for?" style="width: 100%; padding: 15px 0; font-size: 1.5rem; border: none; border-bottom: 2px solid #000; background: transparent; outline: none;" autocomplete="off">
+                <button type="submit" class="btn-primary" style="align-self: flex-start;">Search</button>
+            </form>
+        </div>
+    </div>
+
     <script src="cart.js"></script>
+    <script src="search.js"></script>
     <script type="module" src="product-page.js"></script>
     <script>
         // Shrink navbar on scroll

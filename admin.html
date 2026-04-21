@@ -42,6 +42,7 @@
             </div>
             <nav class="sidebar-nav">
                 <button class="nav-btn active" data-tab="products">Products</button>
+                <button class="nav-btn" data-tab="inventory">Inventory</button>
                 <button class="nav-btn" data-tab="settings">Settings (Visual)</button>
             </nav>
             <div class="sidebar-footer">
@@ -208,6 +209,32 @@
                             <!-- previews go here -->
                         </div>
                     </section>
+                </div>
+            </section>
+
+            <!-- INVENTORY TAB -->
+            <section id="inventoryTab" class="tab-content hidden" style="padding:0; background: #fff;">
+                <div style="padding: 2rem;">
+                    <div class="header-flex">
+                        <h2>Inventory Dashboard</h2>
+                        <button id="saveInventoryBtn" class="btn-primary">Save Inventory</button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Product Name</th>
+                                    <th>Status</th>
+                                    <th>Stock Level</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 

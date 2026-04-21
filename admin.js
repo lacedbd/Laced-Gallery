@@ -245,10 +245,67 @@ async function loadProducts() {
             btn.addEventListener('click', (e) => deleteProduct(e.target.dataset.id));
         });
 
+        renderInventory();
+
     } catch (error) {
         console.error("Error loading products:", error);
         productsTableBody.innerHTML = '<tr><td colspan="5">Error loading products. Check console.</td></tr>';
     }
+    }
+}
+
+function renderInventory() {
+    const inventoryTableBody = document.getElementById('inventoryTableBody');
+    if (!inventoryTableBody) return;
+    
+    inventoryTableBody.innerHTML = '';
+    
+    if (productsCache.length === 0) {
+        inventoryTableBody.innerHTML = '<tr><td colspan="4">No products found.</td></tr>';
+        return;
+    }
+
+    productsCache.forEach((p) => {
+        if (p.stock === undefined) p.stock = 10;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><img src="${p.imageUrl || ''}" alt="product" style="width: 40px; height: 40px; object-fit: contain;"></td>
+            <td><strong>${p.name}</strong></td>
+            <td>${p.visible ? '<span style="color:green">Visible</span>' : '<span style="color:red">Hidden</span>'}</td>
+            <td>
+                <input type="number" class="inventory-input" data-id="${p.id}" value="${p.stock}" style="width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+            </td>
+        `;
+        inventoryTableBody.appendChild(tr);
+    });
+}
+
+const saveInventoryBtn = document.getElementById('saveInventoryBtn');
+if (saveInventoryBtn) {
+    saveInventoryBtn.addEventListener('click', async () => {
+        saveInventoryBtn.textContent = 'Saving...';
+        saveInventoryBtn.disabled = true;
+
+        const inputs = document.querySelectorAll('.inventory-input');
+        inputs.forEach(input => {
+            const id = input.getAttribute('data-id');
+            const stockVal = parseInt(input.value) || 0;
+            const p = productsCache.find(prod => prod.id === id);
+            if (p) p.stock = stockVal;
+        });
+
+        try {
+            currentProductsSha = await saveJsonFile('data/products.json', productsCache, currentProductsSha, 'Update inventory levels');
+            alert('Inventory saved successfully!');
+        } catch (err) {
+            console.error(err);
+            alert('Failed to save inventory.');
+        }
+
+        saveInventoryBtn.textContent = 'Save Inventory';
+        saveInventoryBtn.disabled = false;
+    });
 }
 
 document.getElementById('saveProductBtn').addEventListener('click', async () => {
