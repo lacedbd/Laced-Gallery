@@ -762,3 +762,41 @@ footer {
         text-align: center;
     }
 }
+
+/* Lookbook Carousel */
+.lookbook-carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 15px;
+    padding: 1rem 5%;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+}
+.lookbook-carousel::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+}
+.lookbook-slide {
+    flex: 0 0 85vw;
+    max-width: 500px;
+    height: 400px;
+    scroll-snap-align: center;
+    border-radius: 12px;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Grid View Toggle */
+@media (max-width: 768px) {
+    .grid.grid-view-active {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .grid.grid-view-active .grid-item h3 {
+        font-size: 0.9rem;
+    }
+    .grid.grid-view-active .grid-item p {
+        font-size: 0.8rem;
+    }
+}

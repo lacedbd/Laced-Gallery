@@ -363,6 +363,10 @@ const heroImageInput = document.getElementById('heroImageInput');
 const saveSettingsBtn = document.getElementById('saveSettingsBtn');
 const settingsStatus = document.getElementById('settingsStatus');
 
+const changeLookbookImageBtn = document.getElementById('changeLookbookImageBtn');
+const lookbookImageInput = document.getElementById('lookbookImageInput');
+const lookbookPreview = document.getElementById('lookbookPreview');
+
 promoEnabledVisual.addEventListener('change', (e) => {
     promoBarVisualContainer.style.display = e.target.checked ? 'block' : 'none';
 });
@@ -379,6 +383,22 @@ heroImageInput.addEventListener('change', (e) => {
             settingsStatus.textContent = `${files.length} images selected for slideshow!`;
             settingsStatus.style.color = "blue";
         }
+    }
+});
+
+changeLookbookImageBtn.addEventListener('click', () => {
+    lookbookImageInput.click();
+});
+
+lookbookImageInput.addEventListener('change', (e) => {
+    const files = e.target.files;
+    lookbookPreview.innerHTML = '';
+    for (let i = 0; i < files.length; i++) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(files[i]);
+        img.style.height = '100px';
+        img.style.borderRadius = '4px';
+        lookbookPreview.appendChild(img);
     }
 });
 
@@ -400,6 +420,17 @@ async function loadSettings() {
             heroVisualSection.style.backgroundImage = `url('${currentSettingsState.heroImages[0]}')`;
         } else if (currentSettingsState.heroImageUrl) {
             heroVisualSection.style.backgroundImage = `url('${currentSettingsState.heroImageUrl}')`;
+        }
+
+        if (currentSettingsState.lookbookImages && currentSettingsState.lookbookImages.length > 0) {
+            lookbookPreview.innerHTML = '';
+            currentSettingsState.lookbookImages.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.style.height = '100px';
+                img.style.borderRadius = '4px';
+                lookbookPreview.appendChild(img);
+            });
         }
 
     } catch (error) {
@@ -426,12 +457,23 @@ saveSettingsBtn.addEventListener('click', async () => {
             }
         }
 
+        const lbFiles = lookbookImageInput.files;
+        let lookbookImages = currentSettingsState.lookbookImages || [];
+
+        if (lbFiles.length > 0) {
+            lookbookImages = [];
+            for (let i = 0; i < lbFiles.length; i++) {
+                lookbookImages.push(await uploadImageToGithub(lbFiles[i]));
+            }
+        }
+
         const newSettings = {
             heroHeadline: heroHeadlineVisual.innerText.trim(),
             heroSubtext: heroSubtextVisual.innerText.trim(),
             promoEnabled: promoEnabledVisual.checked,
             promoText: promoTextVisual.innerText.trim(),
-            heroImages: heroImages
+            heroImages: heroImages,
+            lookbookImages: lookbookImages
         };
 
         currentSettingsState = newSettings;

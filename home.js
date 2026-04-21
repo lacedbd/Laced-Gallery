@@ -32,6 +32,23 @@ function renderSettings(s) {
     } else {
         promoBar.style.display = 'none';
     }
+
+    const lookbookSection = document.getElementById('lookbookSection');
+    const lookbookCarousel = document.getElementById('lookbookCarousel');
+    if (lookbookSection && lookbookCarousel) {
+        if (s.lookbookImages && s.lookbookImages.length > 0) {
+            lookbookSection.style.display = 'block';
+            lookbookCarousel.innerHTML = '';
+            s.lookbookImages.forEach(url => {
+                const slide = document.createElement('div');
+                slide.className = 'lookbook-slide';
+                slide.style.backgroundImage = `url('${url}')`;
+                lookbookCarousel.appendChild(slide);
+            });
+        } else {
+            lookbookSection.style.display = 'none';
+        }
+    }
 }
 
 function renderProducts(products) {
@@ -87,6 +104,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (err) {
         console.error("Error fetching products", err);
+    }
+
+    const toggleBtn = document.getElementById('toggleGridViewBtn');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            const grid = document.querySelector('.grid');
+            if (grid) {
+                grid.classList.toggle('grid-view-active');
+                if (grid.classList.contains('grid-view-active')) {
+                    toggleBtn.textContent = 'List View';
+                } else {
+                    toggleBtn.textContent = 'Grid View';
+                }
+            }
+        });
     }
 });
 
