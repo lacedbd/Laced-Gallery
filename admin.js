@@ -11,6 +11,7 @@ const GITHUB_API_BASE = `https://api.github.com/repos/${CONFIG.githubUsername}/$
 let githubToken = localStorage.getItem('laced_github_token') || '';
 
 let currentSettingsSha = null;
+let currentSettingsState = {};
 let currentProductsSha = null;
 let productsCache = [];
 
@@ -44,7 +45,6 @@ async function githubApiRequest(path, method = 'GET', body = null) {
 async function getJsonFile(path) {
     const data = await githubApiRequest(path);
     if (!data) return { content: null, sha: null };
-    // Handle UTF-8 safely
     const decoded = decodeURIComponent(escape(atob(data.content)));
     return { content: JSON.parse(decoded), sha: data.sha };
 }
@@ -89,7 +89,6 @@ async function uploadImageToGithub(file) {
 async function checkAuthAndLoad() {
     if (githubToken) {
         try {
-            // Test token by trying to fetch the repo details
             const res = await fetch(`https://api.github.com/repos/${CONFIG.githubUsername}/${CONFIG.githubRepo}`, {
                 headers: { 'Authorization': `token ${githubToken}` }
             });
@@ -163,10 +162,12 @@ document.getElementById('openAddProductBtn').addEventListener('click', () => {
     document.getElementById('productId').value = '';
     document.getElementById('modalTitle').textContent = 'Add Product';
     productModal.classList.remove('hidden');
+    sendProductsPreview();
 });
 
 document.getElementById('closeModalBtn').addEventListener('click', () => {
     productModal.classList.add('hidden');
+    sendProductsPreview(); // Reverts to saved cache
 });
 
 async function loadProducts() {
@@ -238,21 +239,18 @@ productForm.addEventListener('submit', async (e) => {
         };
 
         if (id) {
-            // Update existing
             const index = productsCache.findIndex(p => p.id === id);
             if(index !== -1) {
                 if (imageUrl) productData.imageUrl = imageUrl; 
-                else productData.imageUrl = productsCache[index].imageUrl; // keep old
+                else productData.imageUrl = productsCache[index].imageUrl; 
                 productsCache[index] = productData;
             }
         } else {
-            // Add new
             if (!imageUrl) throw new Error("Image is required for new products");
             productData.imageUrl = imageUrl;
             productsCache.push(productData);
         }
 
-        // Save back to GitHub
         currentProductsSha = await saveJsonFile('data/products.json', productsCache, currentProductsSha, `Update product ${productData.name}`);
 
         productModal.classList.add('hidden');
@@ -280,6 +278,7 @@ function editProduct(id) {
         
         document.getElementById('modalTitle').textContent = 'Edit Product';
         productModal.classList.remove('hidden');
+        sendProductsPreview();
     }
 }
 
@@ -290,6 +289,7 @@ async function deleteProduct(id) {
             productsCache = productsCache.filter(p => p.id !== id);
             currentProductsSha = await saveJsonFile('data/products.json', productsCache, currentProductsSha, `Delete product ${pName}`);
             loadProducts();
+            sendProductsPreview();
         } catch (error) {
             console.error("Error deleting product:", error);
             alert("Error deleting product.");
@@ -306,12 +306,12 @@ async function loadSettings() {
     try {
         const fileData = await getJsonFile('data/settings.json');
         currentSettingsSha = fileData.sha;
-        const s = fileData.content || {};
+        currentSettingsState = fileData.content || {};
 
-        document.getElementById('heroHeadline').value = s.heroHeadline || '';
-        document.getElementById('heroSubtext').value = s.heroSubtext || '';
-        document.getElementById('promoEnabled').checked = s.promoEnabled || false;
-        document.getElementById('promoText').value = s.promoText || '';
+        document.getElementById('heroHeadline').value = currentSettingsState.heroHeadline || '';
+        document.getElementById('heroSubtext').value = currentSettingsState.heroSubtext || '';
+        document.getElementById('promoEnabled').checked = currentSettingsState.promoEnabled || false;
+        document.getElementById('promoText').value = currentSettingsState.promoText || '';
     } catch (error) {
         console.error("Error loading settings:", error);
     }
@@ -331,7 +331,6 @@ settingsForm.addEventListener('submit', async (e) => {
             heroImageUrl = await uploadImageToGithub(file);
         }
 
-        // Fetch latest state to merge
         const fileData = await getJsonFile('data/settings.json');
         let currentSettings = fileData.content || {};
         currentSettingsSha = fileData.sha;
@@ -345,6 +344,7 @@ settingsForm.addEventListener('submit', async (e) => {
             currentSettings.heroImageUrl = heroImageUrl;
         }
 
+        currentSettingsState = currentSettings;
         currentSettingsSha = await saveJsonFile('data/settings.json', currentSettings, currentSettingsSha, "Update homepage settings");
         
         statusMsg.textContent = "Settings saved successfully!";
@@ -357,6 +357,79 @@ settingsForm.addEventListener('submit', async (e) => {
         btn.textContent = 'Save Settings';
     }
 });
+
+// =========================================================
+// LIVE PREVIEW LOGIC
+// =========================================================
+function sendSettingsPreview() {
+    const iframe = document.getElementById('previewFrame');
+    if (!iframe || !iframe.contentWindow) return;
+
+    const s = {
+        heroHeadline: document.getElementById('heroHeadline').value,
+        heroSubtext: document.getElementById('heroSubtext').value,
+        promoEnabled: document.getElementById('promoEnabled').checked,
+        promoText: document.getElementById('promoText').value,
+        heroImageUrl: currentSettingsState.heroImageUrl || ''
+    };
+    
+    const file = document.getElementById('heroImageInput').files[0];
+    if (file) {
+        s.heroImageUrl = URL.createObjectURL(file);
+    }
+    
+    iframe.contentWindow.postMessage({ type: 'PREVIEW_SETTINGS', payload: s }, '*');
+}
+
+['heroHeadline', 'heroSubtext', 'promoEnabled', 'promoText'].forEach(id => {
+    document.getElementById(id).addEventListener('input', sendSettingsPreview);
+    document.getElementById(id).addEventListener('change', sendSettingsPreview);
+});
+document.getElementById('heroImageInput').addEventListener('change', sendSettingsPreview);
+
+function sendProductsPreview() {
+    const iframe = document.getElementById('previewFrame');
+    if (!iframe || !iframe.contentWindow) return;
+
+    let previewProducts = [...productsCache];
+
+    if (!productModal.classList.contains('hidden')) {
+        const id = document.getElementById('productId').value || 'preview_id';
+        const file = document.getElementById('pImageInput').files[0];
+        
+        let tempImageUrl = '';
+        if (file) tempImageUrl = URL.createObjectURL(file);
+        
+        const previewProduct = {
+            id: id,
+            name: document.getElementById('pName').value || 'New Product',
+            price: Number(document.getElementById('pPrice').value) || 0,
+            category: document.getElementById('pCategory').value,
+            visible: document.getElementById('pVisible').checked,
+            imageUrl: tempImageUrl
+        };
+
+        if (!file && id !== 'preview_id') {
+            const existing = productsCache.find(p => p.id === id);
+            if (existing) previewProduct.imageUrl = existing.imageUrl;
+        }
+
+        const index = previewProducts.findIndex(p => p.id === id);
+        if (index !== -1) {
+            previewProducts[index] = previewProduct;
+        } else {
+            previewProducts.push(previewProduct);
+        }
+    }
+
+    iframe.contentWindow.postMessage({ type: 'PREVIEW_PRODUCTS', payload: previewProducts }, '*');
+}
+
+['pName', 'pPrice', 'pVisible'].forEach(id => {
+    document.getElementById(id).addEventListener('input', sendProductsPreview);
+    document.getElementById(id).addEventListener('change', sendProductsPreview);
+});
+document.getElementById('pImageInput').addEventListener('change', sendProductsPreview);
 
 // Init
 checkAuthAndLoad();
