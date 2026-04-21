@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LACED Admin Dashboard</title>
+    <!-- Base website styles for visual editor -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Admin styles -->
     <link rel="stylesheet" href="admin.css">
     <style>
         .hidden { display: none !important; }
@@ -37,85 +42,85 @@
             </div>
             <nav class="sidebar-nav">
                 <button class="nav-btn active" data-tab="products">Products</button>
-                <button class="nav-btn" data-tab="settings">Settings</button>
+                <button class="nav-btn" data-tab="settings">Settings (Visual)</button>
             </nav>
             <div class="sidebar-footer">
                 <button id="logoutBtn" class="nav-btn" style="color: #ff4444;">Disconnect</button>
             </div>
         </aside>
 
-        <div class="dashboard-body">
-            <!-- Content Area -->
-            <main class="main-content">
+        <!-- Content Area -->
+        <main class="main-content" id="mainContentArea">
+            
+            <!-- PRODUCTS TAB -->
+            <section id="productsTab" class="tab-content">
+                <div class="header-flex">
+                    <h2>Manage Products</h2>
+                    <button id="openAddProductBtn" class="btn-primary">+ Add Product</button>
+                </div>
                 
-                <!-- PRODUCTS TAB -->
-                <section id="productsTab" class="tab-content">
-                    <div class="header-flex">
-                        <h2>Manage Products</h2>
-                        <button id="openAddProductBtn" class="btn-primary">+ Add Product</button>
-                    </div>
-                    
-                    <div class="table-container">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Product Details</th>
-                                    <th>Price</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="productsTableBody">
-                                <!-- Populated by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Product Details</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-                <!-- SETTINGS TAB -->
-                <section id="settingsTab" class="tab-content hidden">
-                    <h2>Homepage Settings</h2>
-                    <form id="settingsForm" class="settings-form">
-                        <div class="form-group">
-                            <label>Hero Headline</label>
-                            <input type="text" id="heroHeadline" required>
+            <!-- SETTINGS TAB (VISUAL EDITOR) -->
+            <section id="settingsTab" class="tab-content hidden" style="padding:0; background: #fff;">
+                
+                <div class="editor-toolbar">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <h2>Homepage Visual Editor</h2>
+                        <span id="settingsStatus" class="status-msg" style="margin-top:0;"></span>
+                    </div>
+                    <div>
+                        <label style="margin-right: 15px; font-weight: 600; cursor: pointer;">
+                            <input type="checkbox" id="promoEnabledVisual"> Show Promo Bar
+                        </label>
+                        <button id="saveSettingsBtn" class="btn-primary">Save Changes</button>
+                    </div>
+                </div>
+
+                <div class="visual-canvas">
+                    <p style="text-align: center; font-size: 0.8rem; color: #888; padding: 10px;">Click directly on the text below to edit it.</p>
+                    
+                    <div class="promo-bar" id="promoBarVisualContainer" style="cursor: text;">
+                        <div class="marquee-content" style="animation: none; justify-content: center;">
+                            <span contenteditable="true" id="promoTextVisual" class="editable-element">Free shipping on all orders over Tk 5,500</span>
                         </div>
-                        <div class="form-group">
-                            <label>Hero Subtext</label>
-                            <input type="text" id="heroSubtext" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Hero Image Upload (Optional)</label>
-                            <input type="file" id="heroImageInput" accept="image/*">
-                            <small>Leave blank to keep existing image</small>
+                    </div>
+
+                    <section class="hero" id="heroVisualSection" style="background-image: url('hero.png'); position: relative; min-height: 60vh;">
+                        <div class="hero-edit-overlay">
+                            <button id="changeHeroImageBtn" class="btn-primary" style="background: rgba(0,0,0,0.8); border: 1px solid #fff;">Change Background Image</button>
+                            <input type="file" id="heroImageInput" accept="image/*" class="hidden">
                         </div>
                         
-                        <hr>
-
-                        <div class="form-group row-group">
-                            <label>Enable Promo Bar</label>
-                            <input type="checkbox" id="promoEnabled">
+                        <div class="hero-content">
+                            <h1 contenteditable="true" id="heroHeadlineVisual" class="editable-element">STAY LACED.</h1>
+                            <p contenteditable="true" id="heroSubtextVisual" class="editable-element">Bold colors. Timeless silhouettes. Shop the new high and low collection.</p>
+                            <div class="hero-buttons">
+                                <a href="#" class="btn btn-pill" onclick="event.preventDefault()" style="opacity: 0.7; cursor: not-allowed;">Shop High Tops</a>
+                                <a href="#" class="btn btn-pill" onclick="event.preventDefault()" style="opacity: 0.7; cursor: not-allowed;">Shop Low Tops</a>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Promo Text</label>
-                            <input type="text" id="promoText">
-                        </div>
-
-                        <button type="submit" id="saveSettingsBtn" class="btn-primary">Save Settings</button>
-                        <p id="settingsStatus" class="status-msg"></p>
-                    </form>
-                </section>
-
-            </main>
-
-            <!-- LIVE PREVIEW AREA -->
-            <aside class="preview-container">
-                <div class="device-frame">
-                    <iframe id="previewFrame" src="index.html"></iframe>
+                    </section>
                 </div>
-            </aside>
-        </div>
+            </section>
+
+        </main>
     </div>
 
     <!-- ADD PRODUCT MODAL -->

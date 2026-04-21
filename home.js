@@ -66,18 +66,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             const products = await response.json();
             renderProducts(products);
         }
-    } catch (err) {
-        console.error("Error loading products", err);
-        document.querySelector('.grid').innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Error loading products from server.</p>';
-    }
-});
 
-// 3. Listen for Live Preview updates from Admin Panel
-window.addEventListener('message', (event) => {
-    // We don't check origin here because we want to allow cross-origin preview if testing locally
-    if (event.data.type === 'PREVIEW_SETTINGS') {
-        renderSettings(event.data.payload);
-    } else if (event.data.type === 'PREVIEW_PRODUCTS') {
-        renderProducts(event.data.payload);
-    }
-});

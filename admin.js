@@ -162,12 +162,10 @@ document.getElementById('openAddProductBtn').addEventListener('click', () => {
     document.getElementById('productId').value = '';
     document.getElementById('modalTitle').textContent = 'Add Product';
     productModal.classList.remove('hidden');
-    sendProductsPreview();
 });
 
 document.getElementById('closeModalBtn').addEventListener('click', () => {
     productModal.classList.add('hidden');
-    sendProductsPreview(); // Reverts to saved cache
 });
 
 async function loadProducts() {
@@ -278,7 +276,6 @@ function editProduct(id) {
         
         document.getElementById('modalTitle').textContent = 'Edit Product';
         productModal.classList.remove('hidden');
-        sendProductsPreview();
     }
 }
 
@@ -289,7 +286,6 @@ async function deleteProduct(id) {
             productsCache = productsCache.filter(p => p.id !== id);
             currentProductsSha = await saveJsonFile('data/products.json', productsCache, currentProductsSha, `Delete product ${pName}`);
             loadProducts();
-            sendProductsPreview();
         } catch (error) {
             console.error("Error deleting product:", error);
             alert("Error deleting product.");
@@ -298,138 +294,95 @@ async function deleteProduct(id) {
 }
 
 // =========================================================
-// HOMEPAGE SETTINGS
+// HOMEPAGE VISUAL EDITOR
 // =========================================================
-const settingsForm = document.getElementById('settingsForm');
 
+// Elements
+const heroHeadlineVisual = document.getElementById('heroHeadlineVisual');
+const heroSubtextVisual = document.getElementById('heroSubtextVisual');
+const promoEnabledVisual = document.getElementById('promoEnabledVisual');
+const promoTextVisual = document.getElementById('promoTextVisual');
+const promoBarVisualContainer = document.getElementById('promoBarVisualContainer');
+const heroVisualSection = document.getElementById('heroVisualSection');
+const changeHeroImageBtn = document.getElementById('changeHeroImageBtn');
+const heroImageInput = document.getElementById('heroImageInput');
+const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+const settingsStatus = document.getElementById('settingsStatus');
+
+// Interaction
+promoEnabledVisual.addEventListener('change', (e) => {
+    promoBarVisualContainer.style.display = e.target.checked ? 'block' : 'none';
+});
+
+changeHeroImageBtn.addEventListener('click', () => {
+    heroImageInput.click();
+});
+
+heroImageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        heroVisualSection.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
+    }
+});
+
+// Load
 async function loadSettings() {
     try {
         const fileData = await getJsonFile('data/settings.json');
         currentSettingsSha = fileData.sha;
         currentSettingsState = fileData.content || {};
 
-        document.getElementById('heroHeadline').value = currentSettingsState.heroHeadline || '';
-        document.getElementById('heroSubtext').value = currentSettingsState.heroSubtext || '';
-        document.getElementById('promoEnabled').checked = currentSettingsState.promoEnabled || false;
-        document.getElementById('promoText').value = currentSettingsState.promoText || '';
+        if (currentSettingsState.heroHeadline) heroHeadlineVisual.innerText = currentSettingsState.heroHeadline;
+        if (currentSettingsState.heroSubtext) heroSubtextVisual.innerText = currentSettingsState.heroSubtext;
+        
+        const isPromoEnabled = currentSettingsState.promoEnabled || false;
+        promoEnabledVisual.checked = isPromoEnabled;
+        promoBarVisualContainer.style.display = isPromoEnabled ? 'block' : 'none';
+        
+        if (currentSettingsState.promoText) promoTextVisual.innerText = currentSettingsState.promoText;
+        if (currentSettingsState.heroImageUrl) heroVisualSection.style.backgroundImage = `url('${currentSettingsState.heroImageUrl}')`;
+
     } catch (error) {
         console.error("Error loading settings:", error);
     }
 }
 
-settingsForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('saveSettingsBtn');
-    const statusMsg = document.getElementById('settingsStatus');
-    btn.textContent = 'Saving...';
+// Save
+saveSettingsBtn.addEventListener('click', async () => {
+    saveSettingsBtn.textContent = 'Saving...';
+    saveSettingsBtn.disabled = true;
     
     try {
-        const file = document.getElementById('heroImageInput').files[0];
-        let heroImageUrl = '';
+        const file = heroImageInput.files[0];
+        let heroImageUrl = currentSettingsState.heroImageUrl || '';
 
         if (file) {
             heroImageUrl = await uploadImageToGithub(file);
         }
 
-        const fileData = await getJsonFile('data/settings.json');
-        let currentSettings = fileData.content || {};
-        currentSettingsSha = fileData.sha;
-
-        currentSettings.heroHeadline = document.getElementById('heroHeadline').value;
-        currentSettings.heroSubtext = document.getElementById('heroSubtext').value;
-        currentSettings.promoEnabled = document.getElementById('promoEnabled').checked;
-        currentSettings.promoText = document.getElementById('promoText').value;
-
-        if (heroImageUrl) {
-            currentSettings.heroImageUrl = heroImageUrl;
-        }
-
-        currentSettingsState = currentSettings;
-        currentSettingsSha = await saveJsonFile('data/settings.json', currentSettings, currentSettingsSha, "Update homepage settings");
-        
-        statusMsg.textContent = "Settings saved successfully!";
-        setTimeout(() => statusMsg.textContent = '', 3000);
-    } catch (error) {
-        console.error("Error saving settings:", error);
-        statusMsg.textContent = "Error saving settings.";
-        statusMsg.style.color = 'red';
-    } finally {
-        btn.textContent = 'Save Settings';
-    }
-});
-
-// =========================================================
-// LIVE PREVIEW LOGIC
-// =========================================================
-function sendSettingsPreview() {
-    const iframe = document.getElementById('previewFrame');
-    if (!iframe || !iframe.contentWindow) return;
-
-    const s = {
-        heroHeadline: document.getElementById('heroHeadline').value,
-        heroSubtext: document.getElementById('heroSubtext').value,
-        promoEnabled: document.getElementById('promoEnabled').checked,
-        promoText: document.getElementById('promoText').value,
-        heroImageUrl: currentSettingsState.heroImageUrl || ''
-    };
-    
-    const file = document.getElementById('heroImageInput').files[0];
-    if (file) {
-        s.heroImageUrl = URL.createObjectURL(file);
-    }
-    
-    iframe.contentWindow.postMessage({ type: 'PREVIEW_SETTINGS', payload: s }, '*');
-}
-
-['heroHeadline', 'heroSubtext', 'promoEnabled', 'promoText'].forEach(id => {
-    document.getElementById(id).addEventListener('input', sendSettingsPreview);
-    document.getElementById(id).addEventListener('change', sendSettingsPreview);
-});
-document.getElementById('heroImageInput').addEventListener('change', sendSettingsPreview);
-
-function sendProductsPreview() {
-    const iframe = document.getElementById('previewFrame');
-    if (!iframe || !iframe.contentWindow) return;
-
-    let previewProducts = [...productsCache];
-
-    if (!productModal.classList.contains('hidden')) {
-        const id = document.getElementById('productId').value || 'preview_id';
-        const file = document.getElementById('pImageInput').files[0];
-        
-        let tempImageUrl = '';
-        if (file) tempImageUrl = URL.createObjectURL(file);
-        
-        const previewProduct = {
-            id: id,
-            name: document.getElementById('pName').value || 'New Product',
-            price: Number(document.getElementById('pPrice').value) || 0,
-            category: document.getElementById('pCategory').value,
-            visible: document.getElementById('pVisible').checked,
-            imageUrl: tempImageUrl
+        const newSettings = {
+            heroHeadline: heroHeadlineVisual.innerText.trim(),
+            heroSubtext: heroSubtextVisual.innerText.trim(),
+            promoEnabled: promoEnabledVisual.checked,
+            promoText: promoTextVisual.innerText.trim(),
+            heroImageUrl: heroImageUrl
         };
 
-        if (!file && id !== 'preview_id') {
-            const existing = productsCache.find(p => p.id === id);
-            if (existing) previewProduct.imageUrl = existing.imageUrl;
-        }
-
-        const index = previewProducts.findIndex(p => p.id === id);
-        if (index !== -1) {
-            previewProducts[index] = previewProduct;
-        } else {
-            previewProducts.push(previewProduct);
-        }
+        currentSettingsState = newSettings;
+        currentSettingsSha = await saveJsonFile('data/settings.json', newSettings, currentSettingsSha, "Update homepage settings via visual editor");
+        
+        settingsStatus.textContent = "Changes saved live!";
+        settingsStatus.style.color = "green";
+        setTimeout(() => settingsStatus.textContent = '', 3000);
+    } catch (error) {
+        console.error("Error saving settings:", error);
+        settingsStatus.textContent = "Error saving changes.";
+        settingsStatus.style.color = 'red';
+    } finally {
+        saveSettingsBtn.textContent = 'Save Changes';
+        saveSettingsBtn.disabled = false;
     }
-
-    iframe.contentWindow.postMessage({ type: 'PREVIEW_PRODUCTS', payload: previewProducts }, '*');
-}
-
-['pName', 'pPrice', 'pVisible'].forEach(id => {
-    document.getElementById(id).addEventListener('input', sendProductsPreview);
-    document.getElementById(id).addEventListener('change', sendProductsPreview);
 });
-document.getElementById('pImageInput').addEventListener('change', sendProductsPreview);
 
 // Init
 checkAuthAndLoad();
