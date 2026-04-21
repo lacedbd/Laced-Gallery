@@ -1,12 +1,21 @@
 [
   {
     "id": "black-high",
-    "name": "Classic Black High Top",
+    "name": "CLASSIC BLACK HIGH TOP",
     "price": 7150,
     "compareAtPrice": 8500,
     "category": "high",
-    "sizes": ["7", "8", "9", "10", "11"],
-    "colors": ["#000000", "#ffffff"],
+    "sizes": [
+      "7",
+      "8",
+      "9",
+      "10",
+      "11"
+    ],
+    "colors": [
+      "#000000",
+      "#ffffff"
+    ],
     "description": "The iconic high top silhouette in timeless black canvas. A staple for any wardrobe, offering durable comfort and classic street style.",
     "visible": true,
     "imageUrl": "black-high.png"
@@ -17,8 +26,17 @@
     "price": 6600,
     "compareAtPrice": null,
     "category": "low",
-    "sizes": ["6", "7", "8", "9", "10"],
-    "colors": ["#ffffff", "#f0f0f0"],
+    "sizes": [
+      "6",
+      "7",
+      "8",
+      "9",
+      "10"
+    ],
+    "colors": [
+      "#ffffff",
+      "#f0f0f0"
+    ],
     "description": "Clean, crisp, and ready for summer. The classic white low top features a breathable canvas upper and the signature rubber toe cap.",
     "visible": true,
     "imageUrl": "white-low.png"
@@ -29,8 +47,17 @@
     "price": 7700,
     "compareAtPrice": 9000,
     "category": "high",
-    "sizes": ["8", "9", "10", "11"],
-    "colors": ["#1e3a8a", "#dc2626", "#16a34a"],
+    "sizes": [
+      "8",
+      "9",
+      "10",
+      "11"
+    ],
+    "colors": [
+      "#1e3a8a",
+      "#dc2626",
+      "#16a34a"
+    ],
     "description": "Make a statement with our vibrant Color Drops collection. Featuring bold primary colors and premium stitching for a standout look.",
     "visible": true,
     "imageUrl": "color-drops.png"
@@ -41,8 +68,16 @@
     "price": 9350,
     "compareAtPrice": 10500,
     "category": "low",
-    "sizes": ["6", "7", "8", "9"],
-    "colors": ["#ffffff", "#000000"],
+    "sizes": [
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "colors": [
+      "#ffffff",
+      "#000000"
+    ],
     "description": "Take your style to new heights. The Platform Elevate features a double-stacked rubber sole for added lift and a bold, modern aesthetic.",
     "visible": true,
     "imageUrl": "platform.png"
