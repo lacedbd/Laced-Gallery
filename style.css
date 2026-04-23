@@ -68,7 +68,7 @@ a {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.6rem 5%;
+    padding: 0.4rem 5%;
     background-color: var(--bg-color);
     position: sticky;
     top: 0;
@@ -84,11 +84,13 @@ a {
 .logo {
     display: flex;
     align-items: center;
+    line-height: 0;
 }
 
 .logo-img {
     height: 50px;
     width: auto;
+    display: block;
     transition: height 0.3s ease;
 }
 
