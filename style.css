@@ -200,6 +200,12 @@ a {
     flex-wrap: wrap;
 }
 
+/* Hide hero text until settings load */
+.hero-content {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
 /* Common Section Styles */
 .section-header {
     text-align: center;

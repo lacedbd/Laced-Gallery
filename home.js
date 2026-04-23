@@ -4,8 +4,8 @@ const SETTINGS_CACHE_KEY = 'laced_settings_cache';
 
 // ── Apply settings to the page ───────────────────────────────────────────────
 function renderSettings(s) {
-    const h1 = document.querySelector('.hero h1');
-    const p  = document.querySelector('.hero p');
+    const h1 = document.getElementById('heroH1') || document.querySelector('.hero h1');
+    const p  = document.getElementById('heroP')  || document.querySelector('.hero p');
     if (h1 && s.heroHeadline) h1.textContent = s.heroHeadline;
     if (p  && s.heroSubtext)  p.textContent  = s.heroSubtext;
 
