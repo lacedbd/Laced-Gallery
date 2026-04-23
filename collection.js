@@ -69,28 +69,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (cachedSettings) {
         try { applyPromo(JSON.parse(cachedSettings)); } catch(e) {}
     }
-    // Fetch fresh settings
-    try {
-        const response = await fetch(getRawDataUrl('settings.json'));
-        if (response.ok) {
-            const s = await response.json();
+    // Fetch settings and products in PARALLEL — settings load never blocks products
+    const [settingsResult, productsResult] = await Promise.allSettled([
+        fetch(getRawDataUrl('settings.json')),
+        fetch(getRawDataUrl('products.json'))
+    ]);
+
+    // Apply settings
+    if (settingsResult.status === 'fulfilled' && settingsResult.value.ok) {
+        try {
+            const s = await settingsResult.value.json();
             localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(s));
             applyPromo(s);
-        }
-    } catch (err) {
-        console.error("Error loading settings", err);
+        } catch(e) { console.error('Settings parse error', e); }
     }
 
-
-    // Fetch Products
-    try {
-        const response = await fetch(getRawDataUrl('products.json'));
-        if (response.ok) {
-            allProducts = await response.json();
+    // Render products
+    if (productsResult.status === 'fulfilled' && productsResult.value.ok) {
+        try {
+            allProducts = await productsResult.value.json();
             updateView();
+        } catch(e) {
+            console.error('Products parse error', e);
+            document.querySelector('.grid').innerHTML = '<p style="grid-column:1/-1;text-align:center;">Error loading products. Please refresh.</p>';
         }
-    } catch (err) {
-        console.error("Error fetching products", err);
+    } else {
+        console.error('Products fetch failed', productsResult.reason);
+        document.querySelector('.grid').innerHTML = '<p style="grid-column:1/-1;text-align:center;">Could not load products. Please check your connection and refresh.</p>';
     }
 
     function updateView() {
