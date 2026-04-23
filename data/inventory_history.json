@@ -1,0 +1,18 @@
+[
+  {
+    "timestamp": "2026-04-23T11:53:51.445Z",
+    "productId": "black-high",
+    "productName": "CLASSIC BLACK HIGH TOP",
+    "variant": "8_#ffffff",
+    "change": 1,
+    "newTotal": 1
+  },
+  {
+    "timestamp": "2026-04-23T11:54:12.992Z",
+    "productId": "black-high",
+    "productName": "CLASSIC BLACK HIGH TOP",
+    "variant": "7_#ffffff",
+    "change": 10,
+    "newTotal": 10
+  }
+]

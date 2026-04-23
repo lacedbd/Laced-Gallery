@@ -18,11 +18,15 @@
     ],
     "description": "The iconic high top silhouette in timeless black canvas. A staple for any wardrobe, offering durable comfort and classic street style.",
     "visible": true,
-    "imageUrl": "black-high.png"
+    "imageUrl": "black-high.png",
+    "stock": {
+      "8_#ffffff": 1,
+      "7_#ffffff": 10
+    }
   },
   {
     "id": "white-low",
-    "name": "Classic White Low Top",
+    "name": "CLASSIC WHITE LOW TOP",
     "price": 6600,
     "compareAtPrice": null,
     "category": "low",
@@ -60,7 +64,8 @@
     ],
     "description": "Make a statement with our vibrant Color Drops collection. Featuring bold primary colors and premium stitching for a standout look.",
     "visible": true,
-    "imageUrl": "color-drops.png"
+    "imageUrl": "color-drops.png",
+    "stock": {}
   },
   {
     "id": "platform",
@@ -80,6 +85,7 @@
     ],
     "description": "Take your style to new heights. The Platform Elevate features a double-stacked rubber sole for added lift and a bold, modern aesthetic.",
     "visible": true,
-    "imageUrl": "platform.png"
+    "imageUrl": "platform.png",
+    "stock": {}
   }
 ]
