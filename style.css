@@ -175,7 +175,9 @@ a {
     position: relative;
     z-index: 2;
     max-width: 600px;
-    color: #ffffff; /* Forcing white text on hero */
+    color: #ffffff;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .hero h1 {
@@ -200,11 +202,6 @@ a {
     flex-wrap: wrap;
 }
 
-/* Hide hero text until settings load */
-.hero-content {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
 
 /* Common Section Styles */
 .section-header {
