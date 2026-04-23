@@ -89,13 +89,17 @@ async function uploadImageToGithub(file) {
 async function checkAuthAndLoad() {
     if (githubToken) {
         try {
-            const res = await fetch(`https://api.github.com/repos/${CONFIG.githubUsername}/${CONFIG.githubRepo}`, {
+            // Check contents endpoint instead of repo metadata to avoid fine-grained permission issues
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.githubUsername}/${CONFIG.githubRepo}/contents/data/products.json`, {
                 headers: { 
                     'Accept': 'application/vnd.github+json',
                     'Authorization': `Bearer ${githubToken}` 
                 }
             });
-            if (!res.ok) throw new Error("Invalid token or repo");
+            if (!res.ok) {
+                const errJson = await res.json().catch(()=>({}));
+                throw new Error(errJson.message || "Invalid token or repository access denied");
+            }
 
             loginScreen.classList.add('hidden');
             dashboard.classList.remove('hidden');
@@ -106,6 +110,7 @@ async function checkAuthAndLoad() {
             localStorage.removeItem('laced_github_token');
             loginScreen.classList.remove('hidden');
             dashboard.classList.add('hidden');
+            throw err;
         }
     } else {
         loginScreen.classList.remove('hidden');
@@ -124,9 +129,18 @@ loginForm.addEventListener('submit', async (e) => {
         localStorage.setItem('laced_github_token', token);
         await checkAuthAndLoad();
     } catch (error) {
-        loginError.textContent = "Connection failed. Check token and config.js.";
+        console.error("Login failed:", error);
+        loginError.textContent = "Connection failed: " + (error.message || "Unknown error");
     } finally {
         btn.textContent = 'Connect to GitHub';
+    }
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await checkAuthAndLoad();
+    } catch (e) {
+        // Silently fail on initial load
     }
 });
 
