@@ -93,11 +93,19 @@ function renderProducts(products) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Fetch Homepage Settings
+    // 1. Apply cached settings INSTANTLY to avoid flash of old content
+    const SETTINGS_CACHE_KEY = 'laced_settings_cache';
+    const cached = localStorage.getItem(SETTINGS_CACHE_KEY);
+    if (cached) {
+        try { renderSettings(JSON.parse(cached)); } catch(e) {}
+    }
+
+    // 2. Fetch fresh settings from network, silently update cache + UI
     try {
         const response = await fetch(getRawDataUrl('settings.json'));
         if (response.ok) {
             const s = await response.json();
+            localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(s));
             renderSettings(s);
         }
     } catch (err) {

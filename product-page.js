@@ -9,28 +9,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Fetch Settings (for promo bar)
+    // Apply promo bar settings — use cache for instant render, refresh in background
+    const SETTINGS_CACHE_KEY = 'laced_settings_cache';
+    function applyPromo(s) {
+        const promoBar = document.querySelector('.promo-bar');
+        if (!promoBar) return;
+        if (s.promoEnabled) {
+            promoBar.style.display = 'block';
+            if (s.promoText) {
+                document.querySelectorAll('.marquee-content span').forEach(span => {
+                    span.textContent = s.promoText;
+                });
+            }
+        } else {
+            promoBar.style.display = 'none';
+        }
+    }
+    const cachedSettings = localStorage.getItem(SETTINGS_CACHE_KEY);
+    if (cachedSettings) {
+        try { applyPromo(JSON.parse(cachedSettings)); } catch(e) {}
+    }
     try {
         const response = await fetch(getRawDataUrl('settings.json'));
         if (response.ok) {
             const s = await response.json();
-            const promoBar = document.querySelector('.promo-bar');
-            if (promoBar) {
-                if (s.promoEnabled) {
-                    promoBar.style.display = 'block';
-                    if (s.promoText) {
-                        document.querySelectorAll('.marquee-content span').forEach(span => {
-                            span.textContent = s.promoText;
-                        });
-                    }
-                } else {
-                    promoBar.style.display = 'none';
-                }
-            }
+            localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(s));
+            applyPromo(s);
         }
     } catch (err) {
         console.error("Error loading settings", err);
     }
+
 
     try {
         const response = await fetch(getRawDataUrl('products.json'));

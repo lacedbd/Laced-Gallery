@@ -49,28 +49,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let allProducts = [];
 
-    // Fetch Settings (for promo bar)
+    // Apply cached promo settings INSTANTLY to avoid flash
+    const SETTINGS_CACHE_KEY = 'laced_settings_cache';
+    function applyPromo(s) {
+        const promoBar = document.querySelector('.promo-bar');
+        if (!promoBar) return;
+        if (s.promoEnabled) {
+            promoBar.style.display = 'block';
+            if (s.promoText) {
+                document.querySelectorAll('.marquee-content span').forEach(span => {
+                    span.textContent = s.promoText;
+                });
+            }
+        } else {
+            promoBar.style.display = 'none';
+        }
+    }
+    const cachedSettings = localStorage.getItem(SETTINGS_CACHE_KEY);
+    if (cachedSettings) {
+        try { applyPromo(JSON.parse(cachedSettings)); } catch(e) {}
+    }
+    // Fetch fresh settings
     try {
         const response = await fetch(getRawDataUrl('settings.json'));
         if (response.ok) {
             const s = await response.json();
-            const promoBar = document.querySelector('.promo-bar');
-            if (promoBar) {
-                if (s.promoEnabled) {
-                    promoBar.style.display = 'block';
-                    if (s.promoText) {
-                        document.querySelectorAll('.marquee-content span').forEach(span => {
-                            span.textContent = s.promoText;
-                        });
-                    }
-                } else {
-                    promoBar.style.display = 'none';
-                }
-            }
+            localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(s));
+            applyPromo(s);
         }
     } catch (err) {
         console.error("Error loading settings", err);
     }
+
 
     // Fetch Products
     try {
