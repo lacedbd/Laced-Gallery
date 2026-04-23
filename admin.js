@@ -105,7 +105,7 @@ async function checkAuthAndLoad() {
 
             loginScreen.classList.add('hidden');
             dashboard.classList.remove('hidden');
-            loadProducts();
+            loadDashboardData();
         } catch (err) {
             console.error(err);
             githubToken = '';
@@ -164,9 +164,9 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     });
 });
 
-function loadDashboardData() {
-    loadProducts();
-    loadSettings();
+async function loadDashboardData() {
+    await loadProducts();
+    await loadSettings();
 }
 
 // =========================================================
