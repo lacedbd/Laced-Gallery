@@ -80,8 +80,41 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (badge) badge.style.display = 'block';
         }
 
-        document.getElementById('mainProductImg').src = product.imageUrl;
+        // ── Images (supports single imageUrl or array imageUrls) ─────────────────
+        const mainImg = document.getElementById('mainProductImg');
+        const thumbsContainer = document.getElementById('productThumbnails');
+        const allImages = product.imageUrls && product.imageUrls.length > 0
+            ? product.imageUrls
+            : (product.imageUrl ? [product.imageUrl] : []);
+
+        if (allImages.length > 0) {
+            mainImg.src = allImages[0];
+        }
+
+        // Build thumbnail strip only if more than 1 image
+        if (thumbsContainer) {
+            thumbsContainer.innerHTML = '';
+            if (allImages.length > 1) {
+                allImages.forEach((url, i) => {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'thumb' + (i === 0 ? ' active' : '');
+                    thumb.innerHTML = `<img src="${url}" alt="Product view ${i + 1}">`;
+                    thumb.addEventListener('click', () => {
+                        mainImg.style.opacity = '0';
+                        setTimeout(() => {
+                            mainImg.src = url;
+                            mainImg.style.opacity = '1';
+                        }, 150);
+                        thumbsContainer.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+                        thumb.classList.add('active');
+                    });
+                    thumbsContainer.appendChild(thumb);
+                });
+            }
+        }
+
         document.getElementById('productDesc').textContent = product.description;
+
 
         // ── Colors ───────────────────────────────────────────────────────────────
         const colorContainer = document.getElementById('colorOptions');

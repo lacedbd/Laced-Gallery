@@ -18,7 +18,7 @@ function renderProducts(products) {
             const a = document.createElement('a');
             a.href = `product.html?id=${p.id}`;
             a.className = 'grid-item';
-            a.style.background = '#f8f9fa';
+
             a.innerHTML = `
                 <div class="img-wrapper">
                     ${soldOut ? '<span class="sale-badge" style="background:#000;">SOLD OUT</span>' : (p.onSale ? '<span class="sale-badge">SALE</span>' : '')}
