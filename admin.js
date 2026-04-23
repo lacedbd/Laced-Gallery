@@ -684,8 +684,15 @@ async function loadSettings() {
             });
         }
 
+        // Reveal editor content now that real values are filled in
+        const visualHeroContent = document.getElementById('visualHeroContent');
+        if (visualHeroContent) visualHeroContent.style.opacity = '1';
+
     } catch (error) {
         console.error("Error loading settings:", error);
+        // Still reveal so the editor isn't broken if fetch fails
+        const visualHeroContent = document.getElementById('visualHeroContent');
+        if (visualHeroContent) visualHeroContent.style.opacity = '1';
     }
 }
 
@@ -724,10 +731,13 @@ saveSettingsBtn.addEventListener('click', async () => {
             promoEnabled: promoEnabledVisual.checked,
             promoText: promoTextVisual.innerText.trim(),
             heroImages: heroImages,
-            lookbookImages: lookbookImages
+            lookbookImages: lookbookImages,
+            _savedAt: Date.now()  // timestamp so live site can detect stale CDN data
         };
 
         currentSettingsState = newSettings;
+        // Also update localStorage cache immediately so live site sees it on next visit
+        localStorage.setItem('laced_settings_cache', JSON.stringify(newSettings));
         currentSettingsSha = await saveJsonFile('data/settings.json', newSettings, currentSettingsSha, "Update homepage settings via visual editor");
         
         settingsStatus.textContent = "Changes saved live!";

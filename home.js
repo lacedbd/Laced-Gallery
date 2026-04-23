@@ -98,22 +98,33 @@ function renderProducts(products) {
 document.addEventListener('DOMContentLoaded', async () => {
 
     // 1. Apply cached settings immediately so layout looks right (BG, promo bar)
+    let cachedTs = 0;
     const cached = localStorage.getItem(SETTINGS_CACHE_KEY);
     if (cached) {
-        try { renderSettings(JSON.parse(cached)); } catch(e) {}
+        try {
+            const cs = JSON.parse(cached);
+            cachedTs = cs._savedAt || 0;
+            renderSettings(cs);
+        } catch(e) {}
     }
 
     // 2. Hide the hero TEXT to prevent any flash of stale/wrong headline
     const heroContent = document.querySelector('.hero-content');
     if (heroContent) heroContent.style.opacity = '0';
 
-    // 3. Fetch FRESH settings, update everything, then reveal
+    // 3. Fetch FRESH settings — only apply if they're NEWER than what's cached.
+    //    This stops stale CDN-cached data from overwriting the localStorage version
+    //    the admin just saved (which already has the latest _savedAt timestamp).
     try {
         const res = await fetch(getRawDataUrl('settings.json'));
         if (res.ok) {
             const s = await res.json();
-            localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(s));
-            renderSettings(s);
+            const networkTs = s._savedAt || 0;
+            if (networkTs >= cachedTs) {
+                localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(s));
+                renderSettings(s);
+            }
+            // else: CDN serving stale data — keep localStorage version
         }
     } catch (err) {
         console.error('Error loading settings', err);
@@ -124,6 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         heroContent.style.transition = 'opacity 0.3s ease';
         heroContent.style.opacity = '1';
     }
+
 
     // 5. Fetch products
     try {

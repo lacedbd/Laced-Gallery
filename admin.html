@@ -182,9 +182,9 @@
                 <div class="visual-canvas">
                     <p style="text-align: center; font-size: 0.8rem; color: #888; padding: 10px;">Click directly on the text below to edit it.</p>
                     
-                    <div class="promo-bar" id="promoBarVisualContainer" style="cursor: text;">
+                    <div class="promo-bar" id="promoBarVisualContainer" style="cursor: text; display: none;">
                         <div class="marquee-content" style="animation: none; justify-content: center;">
-                            <span contenteditable="true" id="promoTextVisual" class="editable-element">Free shipping on all orders over Tk 5,500</span>
+                            <span contenteditable="true" id="promoTextVisual" class="editable-element"></span>
                         </div>
                     </div>
 
@@ -194,9 +194,9 @@
                             <input type="file" id="heroImageInput" accept="image/*" class="hidden" multiple>
                         </div>
                         
-                        <div class="hero-content">
-                            <h1 contenteditable="true" id="heroHeadlineVisual" class="editable-element">STAY LACED.</h1>
-                            <p contenteditable="true" id="heroSubtextVisual" class="editable-element">Bold colors. Timeless silhouettes. Shop the new high and low collection.</p>
+                        <div class="hero-content" id="visualHeroContent" style="opacity:0; transition: opacity 0.3s ease;">
+                            <h1 contenteditable="true" id="heroHeadlineVisual" class="editable-element"></h1>
+                            <p contenteditable="true" id="heroSubtextVisual" class="editable-element"></p>
                             <div class="hero-buttons">
                                 <a href="#" class="btn btn-pill" onclick="event.preventDefault()" style="opacity: 0.7; cursor: not-allowed;">Shop High Tops</a>
                                 <a href="#" class="btn btn-pill" onclick="event.preventDefault()" style="opacity: 0.7; cursor: not-allowed;">Shop Low Tops</a>
