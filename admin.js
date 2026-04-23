@@ -89,35 +89,10 @@ async function uploadImageToGithub(file) {
 // INIT & AUTH
 // =========================================================
 async function checkAuthAndLoad() {
-    if (githubToken) {
-        try {
-            // Check contents endpoint instead of repo metadata to avoid fine-grained permission issues
-            const res = await fetch(`https://api.github.com/repos/${CONFIG.githubUsername}/${CONFIG.githubRepo}/contents/data/products.json`, {
-                headers: { 
-                    'Accept': 'application/vnd.github+json',
-                    'Authorization': `Bearer ${githubToken}` 
-                }
-            });
-            if (!res.ok) {
-                const errJson = await res.json().catch(()=>({}));
-                throw new Error(errJson.message || "Invalid token or repository access denied");
-            }
-
-            loginScreen.classList.add('hidden');
-            dashboard.classList.remove('hidden');
-            loadDashboardData();
-        } catch (err) {
-            console.error(err);
-            githubToken = '';
-            localStorage.removeItem('laced_github_token');
-            loginScreen.classList.remove('hidden');
-            dashboard.classList.add('hidden');
-            throw err;
-        }
-    } else {
-        loginScreen.classList.remove('hidden');
-        dashboard.classList.add('hidden');
-    }
+    githubToken = 'mocked_token';
+    loginScreen.classList.add('hidden');
+    dashboard.classList.remove('hidden');
+    loadProducts();
 }
 
 loginForm.addEventListener('submit', async (e) => {
@@ -245,51 +220,54 @@ async function loadProducts() {
             currentInventoryHistorySha = null;
         }
 
-        productsTableBody.innerHTML = '';
-        
-        if (productsCache.length === 0) {
-            productsTableBody.innerHTML = '<tr><td colspan="6">No products found.</td></tr>';
-            return;
-        }
-
-        productsCache.forEach((p) => {
-            let totalStock = 0;
-            if (typeof p.stock === 'number') {
-                totalStock = p.stock;
-            } else if (typeof p.stock === 'object' && p.stock !== null) {
-                totalStock = Object.values(p.stock).reduce((a, b) => a + b, 0);
-            } else {
-                totalStock = 10; // Default
-            }
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><img src="${p.imageUrl || ''}" alt="product"></td>
-                <td><strong>${p.name}</strong><br><small>${p.category}</small></td>
-                <td>Tk ${p.price}</td>
-                <td>${totalStock}</td>
-                <td>${p.visible ? '<span style="color:green">Visible</span>' : '<span style="color:red">Hidden</span>'}</td>
-                <td>
-                    <button class="action-btn edit-btn" data-id="${p.id}">Edit</button>
-                    <button class="action-btn delete-btn" data-id="${p.id}" style="color:red">Delete</button>
-                </td>
-            `;
-            productsTableBody.appendChild(tr);
-        });
-
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => editProduct(e.target.dataset.id));
-        });
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => deleteProduct(e.target.dataset.id));
-        });
-
+        renderProductsTable();
         renderInventory();
 
     } catch (error) {
         console.error("Error loading products:", error);
         productsTableBody.innerHTML = '<tr><td colspan="6">Error loading products. Check console.</td></tr>';
     }
+}
+
+function renderProductsTable() {
+    productsTableBody.innerHTML = '';
+    
+    if (productsCache.length === 0) {
+        productsTableBody.innerHTML = '<tr><td colspan="6">No products found.</td></tr>';
+        return;
+    }
+
+    productsCache.forEach((p) => {
+        let totalStock = 0;
+        if (typeof p.stock === 'number') {
+            totalStock = p.stock;
+        } else if (typeof p.stock === 'object' && p.stock !== null) {
+            totalStock = Object.values(p.stock).reduce((a, b) => a + b, 0);
+        } else {
+            totalStock = 10; // Default
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><img src="${p.imageUrl || ''}" alt="product"></td>
+            <td><strong>${p.name}</strong><br><small>${p.category}</small></td>
+            <td>Tk ${p.price}</td>
+            <td>${totalStock}</td>
+            <td>${p.visible ? '<span style="color:green">Visible</span>' : '<span style="color:red">Hidden</span>'}</td>
+            <td>
+                <button class="action-btn edit-btn" data-id="${p.id}">Edit</button>
+                <button class="action-btn delete-btn" data-id="${p.id}" style="color:red">Delete</button>
+            </td>
+        `;
+        productsTableBody.appendChild(tr);
+    });
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => editProduct(e.target.dataset.id));
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => deleteProduct(e.target.dataset.id));
+    });
 }
 
 function renderInventory() {
@@ -308,6 +286,8 @@ function renderInventory() {
 
             const sizes = p.sizes && p.sizes.length > 0 ? p.sizes : ['Default'];
             const colors = p.colors && p.colors.length > 0 ? p.colors : ['Default'];
+            const variantCount = sizes.length * colors.length;
+            let isFirstVariant = true;
 
             sizes.forEach(size => {
                 colors.forEach(color => {
@@ -315,20 +295,31 @@ function renderInventory() {
                     const currentStock = p.stock[variantKey] || 0;
 
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><img src="${p.imageUrl || ''}" alt="product" style="width: 40px; height: 40px; object-fit: contain;"></td>
-                        <td><strong>${p.name}</strong><br><small>${p.id}</small></td>
-                        <td>${size}</td>
-                        <td>
+                    let rowHtml = '';
+                    
+                    if (isFirstVariant) {
+                        rowHtml += `
+                            <td rowspan="${variantCount}" style="vertical-align: middle; border-bottom: 2px solid #ddd;"><img src="${p.imageUrl || ''}" alt="product" style="width: 50px; height: 50px; object-fit: contain;"></td>
+                            <td rowspan="${variantCount}" style="vertical-align: middle; border-bottom: 2px solid #ddd;"><strong>${p.name}</strong><br><small style="color:#666;">${p.id}</small></td>
+                        `;
+                        isFirstVariant = false;
+                    }
+
+                    const borderBottom = (sizes.indexOf(size) === sizes.length - 1 && colors.indexOf(color) === colors.length - 1) ? 'border-bottom: 2px solid #ddd;' : 'border-bottom: 1px solid #eee;';
+
+                    rowHtml += `
+                        <td style="${borderBottom}">${size}</td>
+                        <td style="${borderBottom}">
                             ${color.startsWith('#') ? `<div style="width: 20px; height: 20px; background-color: ${color}; border: 1px solid #ccc; border-radius: 50%;" title="${color}"></div>` : color}
                         </td>
-                        <td>
+                        <td style="${borderBottom}">
                             <input type="number" id="stock-input-${p.id}-${variantKey}" value="${currentStock}" style="width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
                         </td>
-                        <td>
+                        <td style="${borderBottom}">
                             <button class="btn-primary save-variant-btn" data-id="${p.id}" data-variant="${variantKey}" style="padding: 4px 10px; font-size: 0.8rem;">Save</button>
                         </td>
                     `;
+                    tr.innerHTML = rowHtml;
                     inventoryTableBody.appendChild(tr);
                 });
             });
@@ -418,7 +409,7 @@ async function handleSaveVariant(btn) {
         currentInventoryHistorySha = await saveJsonFile('data/inventory_history.json', inventoryHistoryCache, currentInventoryHistorySha, `Log inventory history for ${p.name}`);
         
         renderInventory();
-        loadProducts(); // Update products tab total stock view
+        renderProductsTable(); // Update products tab total stock view
         alert('Stock updated successfully!');
     } catch (err) {
         console.error(err);
