@@ -209,15 +209,10 @@ document.getElementById('openAddProductBtn').addEventListener('click', () => {
     productVisualEditor.classList.remove('hidden');
 });
 
-document.getElementById('vpComparePrice').addEventListener('input', updateSaleBadgePreview);
-document.getElementById('vpPrice').addEventListener('input', updateSaleBadgePreview);
+document.getElementById('vpOnSale').addEventListener('change', updateSaleBadgePreview);
 
 function updateSaleBadgePreview() {
-    const p = Number(document.getElementById('vpPrice').innerText.trim().replace(/[^0-9.]/g, '')) || 0;
-    const cpText = document.getElementById('vpComparePrice').innerText.trim().replace(/[^0-9.]/g, '');
-    const cp = cpText ? Number(cpText) : 0;
-    
-    if (cp > p && p > 0) {
+    if (document.getElementById('vpOnSale').checked) {
         document.getElementById('vpSaleBadge').style.display = 'block';
     } else {
         document.getElementById('vpSaleBadge').style.display = 'none';
