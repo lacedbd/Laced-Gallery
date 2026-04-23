@@ -387,11 +387,69 @@ function renderInventoryHistory() {
     });
 }
 
+function showCustomConfirm(title, message) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('customModal');
+        if (!modal) { resolve(confirm(message)); return; } // Fallback
+        const titleEl = document.getElementById('customModalTitle');
+        const msgEl = document.getElementById('customModalMessage');
+        const cancelBtn = document.getElementById('customModalCancel');
+        const confirmBtn = document.getElementById('customModalConfirm');
+
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+        cancelBtn.style.display = 'inline-block';
+        modal.classList.remove('hidden');
+
+        const cleanup = () => {
+            cancelBtn.removeEventListener('click', onCancel);
+            confirmBtn.removeEventListener('click', onConfirm);
+            modal.classList.add('hidden');
+        };
+
+        const onCancel = () => { cleanup(); resolve(false); };
+        const onConfirm = () => { cleanup(); resolve(true); };
+
+        cancelBtn.addEventListener('click', onCancel);
+        confirmBtn.addEventListener('click', onConfirm);
+    });
+}
+
+function showCustomAlert(title, message) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('customModal');
+        if (!modal) { alert(message); resolve(); return; } // Fallback
+        const titleEl = document.getElementById('customModalTitle');
+        const msgEl = document.getElementById('customModalMessage');
+        const cancelBtn = document.getElementById('customModalCancel');
+        const confirmBtn = document.getElementById('customModalConfirm');
+
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+        cancelBtn.style.display = 'none'; // Hide cancel for alert
+        modal.classList.remove('hidden');
+
+        const cleanup = () => {
+            confirmBtn.removeEventListener('click', onConfirm);
+            modal.classList.add('hidden');
+        };
+
+        const onConfirm = () => { cleanup(); resolve(); };
+
+        confirmBtn.addEventListener('click', onConfirm);
+    });
+}
+
 async function handleSaveVariant(btn) {
     const pId = btn.getAttribute('data-id');
     const variantKey = btn.getAttribute('data-variant');
     const inputField = document.getElementById(`stock-input-${pId}-${variantKey}`);
-    const newVal = parseInt(inputField.value) || 0;
+    const newVal = parseInt(inputField.value);
+
+    if (isNaN(newVal)) {
+        await showCustomAlert("Invalid Input", "Please enter a valid number for stock.");
+        return;
+    }
 
     const p = productsCache.find(prod => prod.id === pId);
     if (!p) return;
@@ -401,14 +459,15 @@ async function handleSaveVariant(btn) {
 
     const diff = newVal - oldVal;
     if (diff === 0) {
-        alert("No change made to stock.");
+        await showCustomAlert("No Changes", "No change made to stock.");
         return;
     }
 
     const action = diff > 0 ? 'INCREASE' : 'DECREASE';
-    const msg = `Are you sure you want to ${action} the stock for ${p.name} (Variant: ${variantKey.replace('_', ' / ')}) by ${Math.abs(diff)}?\nNew total will be: ${newVal}`;
+    const msg = `Are you sure you want to ${action} the stock for ${p.name} (Variant: ${variantKey.replace('_', ' / ')}) by ${Math.abs(diff)}?\n\nNew total will be: ${newVal}`;
     
-    if (!confirm(msg)) {
+    const isConfirmed = await showCustomConfirm("Confirm Stock Change", msg);
+    if (!isConfirmed) {
         inputField.value = oldVal;
         return;
     }
@@ -435,10 +494,10 @@ async function handleSaveVariant(btn) {
         
         renderInventory();
         renderProductsTable(); // Update products tab total stock view
-        alert('Stock updated successfully!');
+        await showCustomAlert("Success", 'Stock updated successfully!');
     } catch (err) {
         console.error(err);
-        alert('Failed to save stock.');
+        await showCustomAlert("Error", 'Failed to save stock. Please check console for details.');
         btn.disabled = false;
         btn.textContent = 'Save';
     }
