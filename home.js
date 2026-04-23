@@ -22,15 +22,17 @@ function renderSettings(s) {
     }
     
     const promoBar = document.querySelector('.promo-bar');
-    if (s.promoEnabled) {
-        promoBar.style.display = 'block';
-        if (s.promoText) {
-            document.querySelectorAll('.marquee-content span').forEach(span => {
-                span.textContent = s.promoText;
-            });
+    if (promoBar) {
+        if (s.promoEnabled) {
+            promoBar.style.display = 'block';
+            if (s.promoText) {
+                document.querySelectorAll('.marquee-content span').forEach(span => {
+                    span.textContent = s.promoText;
+                });
+            }
+        } else {
+            promoBar.style.display = 'none';
         }
-    } else {
-        promoBar.style.display = 'none';
     }
 
     const lookbookSection = document.getElementById('lookbookSection');

@@ -49,6 +49,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let allProducts = [];
 
+    // Fetch Settings (for promo bar)
+    try {
+        const response = await fetch(getRawDataUrl('settings.json'));
+        if (response.ok) {
+            const s = await response.json();
+            const promoBar = document.querySelector('.promo-bar');
+            if (promoBar) {
+                if (s.promoEnabled) {
+                    promoBar.style.display = 'block';
+                    if (s.promoText) {
+                        document.querySelectorAll('.marquee-content span').forEach(span => {
+                            span.textContent = s.promoText;
+                        });
+                    }
+                } else {
+                    promoBar.style.display = 'none';
+                }
+            }
+        }
+    } catch (err) {
+        console.error("Error loading settings", err);
+    }
+
     // Fetch Products
     try {
         const response = await fetch(getRawDataUrl('products.json'));
