@@ -89,10 +89,35 @@ async function uploadImageToGithub(file) {
 // INIT & AUTH
 // =========================================================
 async function checkAuthAndLoad() {
-    githubToken = 'mocked_token';
-    loginScreen.classList.add('hidden');
-    dashboard.classList.remove('hidden');
-    loadProducts();
+    if (githubToken) {
+        try {
+            // Check contents endpoint instead of repo metadata to avoid fine-grained permission issues
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.githubUsername}/${CONFIG.githubRepo}/contents/data/products.json`, {
+                headers: { 
+                    'Accept': 'application/vnd.github+json',
+                    'Authorization': `Bearer ${githubToken}` 
+                }
+            });
+            if (!res.ok) {
+                const errJson = await res.json().catch(()=>({}));
+                throw new Error(errJson.message || "Invalid token or repository access denied");
+            }
+
+            loginScreen.classList.add('hidden');
+            dashboard.classList.remove('hidden');
+            loadProducts();
+        } catch (err) {
+            console.error(err);
+            githubToken = '';
+            localStorage.removeItem('laced_github_token');
+            loginScreen.classList.remove('hidden');
+            dashboard.classList.add('hidden');
+            throw err;
+        }
+    } else {
+        loginScreen.classList.remove('hidden');
+        dashboard.classList.add('hidden');
+    }
 }
 
 loginForm.addEventListener('submit', async (e) => {
