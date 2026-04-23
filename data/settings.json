@@ -1,7 +1,7 @@
 {
   "heroHeadline": ".",
   "heroSubtext": "Bold colors. Timeless silhouettes. Shop the new high and low collection.",
-  "promoEnabled": false,
+  "promoEnabled": true,
   "promoText": "FREE SHIPPING ON ALL ORDERS OVER TK 5,500",
   "heroImages": [
     "hero.png"
