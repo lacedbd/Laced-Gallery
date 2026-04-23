@@ -237,6 +237,7 @@ a {
 }
 
 .img-wrapper {
+    position: relative;
     width: 100%;
     aspect-ratio: 1;
     margin-bottom: 1.5rem;
@@ -525,6 +526,12 @@ footer {
     border-radius: 8px;
     display: flex;
     align-items: center;
+    justify-content: center;
+}
+.main-image-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
     justify-content: center;
 }
 .main-image-wrapper img {
