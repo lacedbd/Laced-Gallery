@@ -22,7 +22,7 @@ async function githubApiRequest(path, method = 'GET', body = null) {
     if (!githubToken) throw new Error("Not authenticated");
     
     const headers = {
-        'Authorization': `token ${githubToken}`,
+        'Authorization': `Bearer ${githubToken}`,
         'Accept': 'application/vnd.github.v3+json'
     };
 
@@ -90,7 +90,10 @@ async function checkAuthAndLoad() {
     if (githubToken) {
         try {
             const res = await fetch(`https://api.github.com/repos/${CONFIG.githubUsername}/${CONFIG.githubRepo}`, {
-                headers: { 'Authorization': `token ${githubToken}` }
+                headers: { 
+                    'Accept': 'application/vnd.github+json',
+                    'Authorization': `Bearer ${githubToken}` 
+                }
             });
             if (!res.ok) throw new Error("Invalid token or repo");
 
