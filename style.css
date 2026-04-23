@@ -83,13 +83,13 @@ a {
 }
 
 .logo-img {
-    height: 38px;
+    height: 41px;
     width: auto;
     transition: height 0.3s ease;
 }
 
 .navbar.scrolled .logo-img {
-    height: 30px;
+    height: 32px;
 }
 
 .logo-img:hover {
