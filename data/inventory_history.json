@@ -22,5 +22,13 @@
     "variant": "7_#ffffff",
     "change": 6,
     "newTotal": 6
+  },
+  {
+    "timestamp": "2026-04-23T12:59:19.111Z",
+    "productId": "color-drops",
+    "productName": "COLOR DROPS EDITION",
+    "variant": "10_#1e3a8a",
+    "change": 30,
+    "newTotal": 30
   }
 ]
