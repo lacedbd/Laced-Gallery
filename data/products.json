@@ -18,7 +18,7 @@
       "#ffffff"
     ],
     "description": "The iconic high top silhouette in timeless black canvas. A staple for any wardrobe, offering durable comfort and classic street style.",
-    "visible": false,
+    "visible": true,
     "onSale": true,
     "imageUrl": "black-high.png"
   },
