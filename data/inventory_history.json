@@ -30,5 +30,13 @@
     "variant": "10_#1e3a8a",
     "change": 30,
     "newTotal": 30
+  },
+  {
+    "timestamp": "2026-04-23T13:00:09.368Z",
+    "productId": "black-high",
+    "productName": "CLASSIC BLACK HIGH TOP",
+    "variant": "7_#ffffff",
+    "change": 22,
+    "newTotal": 22
   }
 ]
