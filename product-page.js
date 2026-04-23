@@ -65,13 +65,52 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const btn = document.createElement('button');
                     btn.className = 'size-btn';
                     btn.textContent = s;
+                    // Set disabled based on current selectedColor and stock
+                    if (selectedColor) {
+                        const key = `${s}_${selectedColor}`;
+                        if (typeof product.stock === 'object' && product.stock[key] !== undefined) {
+                            btn.disabled = product.stock[key] <= 0;
+                        }
+                    }
                     btn.addEventListener('click', () => {
+                        // Prevent selection if out of stock
+                        if (btn.disabled) return;
                         document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
                         btn.classList.add('selected');
                         selectedSize = s;
                         updateCartButton();
                     });
                     sizeContainer.appendChild(btn);
+                });
+
+                // Refresh size button disabled state when a color is selected
+                function refreshSizeAvailability() {
+                    document.querySelectorAll('.size-btn').forEach(b => {
+                        const sizeVal = b.textContent.trim();
+                        if (selectedColor) {
+                            const key = `${sizeVal}_${selectedColor}`;
+                            if (typeof product.stock === 'object' && product.stock[key] !== undefined) {
+                                b.disabled = product.stock[key] <= 0;
+                            } else {
+                                b.disabled = false;
+                            }
+                        } else {
+                            b.disabled = false;
+                        }
+                        // Deselect if currently selected but now disabled
+                        if (b.disabled && b.classList.contains('selected')) {
+                            b.classList.remove('selected');
+                            selectedSize = null;
+                        }
+                    });
+                    updateCartButton();
+                }
+
+                // Hook into color selection to update sizes
+                colorContainer.addEventListener('click', (e) => {
+                    if (e.target && e.target.classList.contains('color-btn')) {
+                        refreshSizeAvailability();
+                    }
                 });
 
                 const oldBtn = document.getElementById('addToCartBtn');
