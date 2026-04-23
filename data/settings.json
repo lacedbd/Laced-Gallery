@@ -2,7 +2,13 @@
   "heroHeadline": "STAY LACED.",
   "heroSubtext": "Bold colors. Timeless silhouettes. Shop the new high and low collection.",
   "promoEnabled": true,
-  "promoText": "Free shipping on all orders over Tk 5,500",
-  "heroImages": ["hero.png"],
-  "lookbookImages": ["lookbook1.png", "lookbook2.png", "lookbook3.png"]
+  "promoText": "FREE SHIPPING ON ALL ORDERS OVER TK 5,500",
+  "heroImages": [
+    "hero.png"
+  ],
+  "lookbookImages": [
+    "lookbook1.png",
+    "lookbook2.png",
+    "lookbook3.png"
+  ]
 }
