@@ -26,7 +26,7 @@
   },
   {
     "id": "white-low",
-    "name": "Classic White Low Top",
+    "name": "CLASSIC WHITE LOW TOP",
     "price": 6600,
     "compareAtPrice": null,
     "category": "low",
@@ -43,8 +43,7 @@
     ],
     "description": "Clean, crisp, and ready for summer. The classic white low top features a breathable canvas upper and the signature rubber toe cap.",
     "visible": true,
-    "imageUrl": "white-low.png",
-    "stock": {}
+    "imageUrl": "white-low.png"
   },
   {
     "id": "color-drops",
