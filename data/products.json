@@ -20,7 +20,8 @@
     "visible": true,
     "imageUrl": "black-high.png",
     "stock": {
-      "8_#ffffff": 1
+      "8_#ffffff": 1,
+      "7_#ffffff": 10
     }
   },
   {
