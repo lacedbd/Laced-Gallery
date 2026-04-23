@@ -108,33 +108,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.history.replaceState(null, '', newUrl);
 
         let filtered = [];
+        const categoryToggle = document.querySelector('.category-toggle');
+        const sectionH2 = document.querySelector('.section-header h2');
+        const sectionP  = document.querySelector('.section-header p');
 
         if (searchQuery) {
-            document.querySelector('.category-toggle').style.display = 'none';
-            document.querySelector('.section-header h2').textContent = `Search results for "${searchQuery}"`;
-            document.querySelector('.section-header p').textContent = '';
-            filtered = allProducts.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase()));
-            
+            if (categoryToggle) categoryToggle.style.display = 'none';
+            if (sectionH2) sectionH2.textContent = `Search results for "${searchQuery}"`;
+            if (sectionP)  sectionP.textContent = '';
+            filtered = allProducts.filter(p =>
+                p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()))
+            );
             if (filtered.length === 0) {
                 const grid = document.querySelector('.grid');
-                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center;">No products found matching "${searchQuery}".</p>`;
+                if (grid) grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center;">No products found matching "${searchQuery}".</p>`;
                 return;
             }
         } else {
-            document.querySelector('.category-toggle').style.display = 'flex';
-            document.querySelector('.section-header h2').textContent = 'Collection';
-            document.querySelector('.section-header p').textContent = 'Shop by silhouette';
+            if (categoryToggle) categoryToggle.style.display = 'flex';
+            if (sectionH2) sectionH2.textContent = 'Collection';
+            if (sectionP)  sectionP.textContent = 'Shop by silhouette';
 
-            if (category === 'high') {
-                filterHighBtn.style.background = '#000';
-                filterHighBtn.style.color = '#fff';
-                filterLowBtn.style.background = 'transparent';
-                filterLowBtn.style.color = '#000';
-            } else {
-                filterLowBtn.style.background = '#000';
-                filterLowBtn.style.color = '#fff';
-                filterHighBtn.style.background = 'transparent';
-                filterHighBtn.style.color = '#000';
+            if (filterHighBtn && filterLowBtn) {
+                if (category === 'high') {
+                    filterHighBtn.style.background = '#000';
+                    filterHighBtn.style.color = '#fff';
+                    filterLowBtn.style.background = 'transparent';
+                    filterLowBtn.style.color = '#000';
+                } else {
+                    filterLowBtn.style.background = '#000';
+                    filterLowBtn.style.color = '#fff';
+                    filterHighBtn.style.background = 'transparent';
+                    filterHighBtn.style.color = '#000';
+                }
             }
             filtered = allProducts.filter(p => p.category === category);
         }
