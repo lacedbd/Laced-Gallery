@@ -218,7 +218,6 @@
                 <div style="padding: 2rem;">
                     <div class="header-flex">
                         <h2>Inventory Dashboard</h2>
-                        <button id="saveInventoryBtn" class="btn-primary">Save Inventory</button>
                     </div>
                     
                     <div class="table-container">
@@ -227,11 +226,33 @@
                                 <tr>
                                     <th>Image</th>
                                     <th>Product Name</th>
-                                    <th>Status</th>
+                                    <th>Size</th>
+                                    <th>Color</th>
                                     <th>Stock Level</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="inventoryTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="header-flex" style="margin-top: 3rem;">
+                        <h2>Inventory Edit History</h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Product</th>
+                                    <th>Variant</th>
+                                    <th>Change</th>
+                                    <th>New Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryHistoryBody">
                                 <!-- Populated by JS -->
                             </tbody>
                         </table>

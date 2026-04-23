@@ -14,6 +14,8 @@ let currentSettingsSha = null;
 let currentSettingsState = {};
 let currentProductsSha = null;
 let productsCache = [];
+let currentInventoryHistorySha = null;
+let inventoryHistoryCache = [];
 
 // =========================================================
 // GITHUB API HELPERS
@@ -233,6 +235,16 @@ async function loadProducts() {
         productsCache = fileData.content || [];
         currentProductsSha = fileData.sha;
 
+        try {
+            const historyData = await getJsonFile('data/inventory_history.json');
+            inventoryHistoryCache = historyData.content || [];
+            currentInventoryHistorySha = historyData.sha;
+        } catch (e) {
+            console.log("No inventory history found, starting fresh.");
+            inventoryHistoryCache = [];
+            currentInventoryHistorySha = null;
+        }
+
         productsTableBody.innerHTML = '';
         
         if (productsCache.length === 0) {
@@ -241,12 +253,21 @@ async function loadProducts() {
         }
 
         productsCache.forEach((p) => {
+            let totalStock = 0;
+            if (typeof p.stock === 'number') {
+                totalStock = p.stock;
+            } else if (typeof p.stock === 'object' && p.stock !== null) {
+                totalStock = Object.values(p.stock).reduce((a, b) => a + b, 0);
+            } else {
+                totalStock = 10; // Default
+            }
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><img src="${p.imageUrl || ''}" alt="product"></td>
                 <td><strong>${p.name}</strong><br><small>${p.category}</small></td>
                 <td>Tk ${p.price}</td>
-                <td>${p.stock !== undefined ? p.stock : 10}</td>
+                <td>${totalStock}</td>
                 <td>${p.visible ? '<span style="color:green">Visible</span>' : '<span style="color:red">Hidden</span>'}</td>
                 <td>
                     <button class="action-btn edit-btn" data-id="${p.id}">Edit</button>
@@ -278,51 +299,133 @@ function renderInventory() {
     inventoryTableBody.innerHTML = '';
     
     if (productsCache.length === 0) {
-        inventoryTableBody.innerHTML = '<tr><td colspan="4">No products found.</td></tr>';
+        inventoryTableBody.innerHTML = '<tr><td colspan="6">No products found.</td></tr>';
+    } else {
+        productsCache.forEach((p) => {
+            if (typeof p.stock === 'number' || p.stock === undefined) {
+                p.stock = {};
+            }
+
+            const sizes = p.sizes && p.sizes.length > 0 ? p.sizes : ['Default'];
+            const colors = p.colors && p.colors.length > 0 ? p.colors : ['Default'];
+
+            sizes.forEach(size => {
+                colors.forEach(color => {
+                    const variantKey = `${size}_${color}`;
+                    const currentStock = p.stock[variantKey] || 0;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><img src="${p.imageUrl || ''}" alt="product" style="width: 40px; height: 40px; object-fit: contain;"></td>
+                        <td><strong>${p.name}</strong><br><small>${p.id}</small></td>
+                        <td>${size}</td>
+                        <td>
+                            ${color.startsWith('#') ? `<div style="width: 20px; height: 20px; background-color: ${color}; border: 1px solid #ccc; border-radius: 50%;" title="${color}"></div>` : color}
+                        </td>
+                        <td>
+                            <input type="number" id="stock-input-${p.id}-${variantKey}" value="${currentStock}" style="width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                        </td>
+                        <td>
+                            <button class="btn-primary save-variant-btn" data-id="${p.id}" data-variant="${variantKey}" style="padding: 4px 10px; font-size: 0.8rem;">Save</button>
+                        </td>
+                    `;
+                    inventoryTableBody.appendChild(tr);
+                });
+            });
+        });
+
+        document.querySelectorAll('.save-variant-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => handleSaveVariant(e.target));
+        });
+    }
+
+    renderInventoryHistory();
+}
+
+function renderInventoryHistory() {
+    const historyBody = document.getElementById('inventoryHistoryBody');
+    if (!historyBody) return;
+    historyBody.innerHTML = '';
+
+    if (!inventoryHistoryCache || inventoryHistoryCache.length === 0) {
+        historyBody.innerHTML = '<tr><td colspan="5">No history found.</td></tr>';
         return;
     }
 
-    productsCache.forEach((p) => {
-        if (p.stock === undefined) p.stock = 10;
-        
+    const sortedHistory = [...inventoryHistoryCache].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    sortedHistory.forEach(log => {
         const tr = document.createElement('tr');
+        const isIncrease = log.change > 0;
+        const color = isIncrease ? 'green' : (log.change < 0 ? 'red' : 'gray');
+        const changeStr = (log.change > 0 ? '+' : '') + log.change;
+
         tr.innerHTML = `
-            <td><img src="${p.imageUrl || ''}" alt="product" style="width: 40px; height: 40px; object-fit: contain;"></td>
-            <td><strong>${p.name}</strong></td>
-            <td>${p.visible ? '<span style="color:green">Visible</span>' : '<span style="color:red">Hidden</span>'}</td>
-            <td>
-                <input type="number" class="inventory-input" data-id="${p.id}" value="${p.stock}" style="width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
-            </td>
+            <td>${new Date(log.timestamp).toLocaleString()}</td>
+            <td><strong>${log.productName}</strong></td>
+            <td>${log.variant.replace('_', ' / ')}</td>
+            <td style="color: ${color}; font-weight: bold;">${changeStr}</td>
+            <td>${log.newTotal}</td>
         `;
-        inventoryTableBody.appendChild(tr);
+        historyBody.appendChild(tr);
     });
 }
 
-const saveInventoryBtn = document.getElementById('saveInventoryBtn');
-if (saveInventoryBtn) {
-    saveInventoryBtn.addEventListener('click', async () => {
-        saveInventoryBtn.textContent = 'Saving...';
-        saveInventoryBtn.disabled = true;
+async function handleSaveVariant(btn) {
+    const pId = btn.getAttribute('data-id');
+    const variantKey = btn.getAttribute('data-variant');
+    const inputField = document.getElementById(`stock-input-${pId}-${variantKey}`);
+    const newVal = parseInt(inputField.value) || 0;
 
-        const inputs = document.querySelectorAll('.inventory-input');
-        inputs.forEach(input => {
-            const id = input.getAttribute('data-id');
-            const stockVal = parseInt(input.value) || 0;
-            const p = productsCache.find(prod => prod.id === id);
-            if (p) p.stock = stockVal;
-        });
+    const p = productsCache.find(prod => prod.id === pId);
+    if (!p) return;
 
-        try {
-            currentProductsSha = await saveJsonFile('data/products.json', productsCache, currentProductsSha, 'Update inventory levels');
-            alert('Inventory saved successfully!');
-        } catch (err) {
-            console.error(err);
-            alert('Failed to save inventory.');
-        }
+    if (typeof p.stock !== 'object' || p.stock === null) p.stock = {};
+    const oldVal = p.stock[variantKey] || 0;
 
-        saveInventoryBtn.textContent = 'Save Inventory';
-        saveInventoryBtn.disabled = false;
-    });
+    const diff = newVal - oldVal;
+    if (diff === 0) {
+        alert("No change made to stock.");
+        return;
+    }
+
+    const action = diff > 0 ? 'INCREASE' : 'DECREASE';
+    const msg = `Are you sure you want to ${action} the stock for ${p.name} (Variant: ${variantKey.replace('_', ' / ')}) by ${Math.abs(diff)}?\nNew total will be: ${newVal}`;
+    
+    if (!confirm(msg)) {
+        inputField.value = oldVal;
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    p.stock[variantKey] = newVal;
+
+    try {
+        currentProductsSha = await saveJsonFile('data/products.json', productsCache, currentProductsSha, `Update stock for ${p.name}`);
+        
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            productId: p.id,
+            productName: p.name,
+            variant: variantKey,
+            change: diff,
+            newTotal: newVal
+        };
+        inventoryHistoryCache.push(logEntry);
+        
+        currentInventoryHistorySha = await saveJsonFile('data/inventory_history.json', inventoryHistoryCache, currentInventoryHistorySha, `Log inventory history for ${p.name}`);
+        
+        renderInventory();
+        loadProducts(); // Update products tab total stock view
+        alert('Stock updated successfully!');
+    } catch (err) {
+        console.error(err);
+        alert('Failed to save stock.');
+        btn.disabled = false;
+        btn.textContent = 'Save';
+    }
 }
 
 document.getElementById('saveProductBtn').addEventListener('click', async () => {
