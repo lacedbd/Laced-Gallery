@@ -21,7 +21,9 @@
     "visible": true,
     "onSale": true,
     "imageUrl": "black-high.png",
-    "stock": {}
+    "stock": {
+      "7_#ffffff": 22
+    }
   },
   {
     "id": "white-low",
