@@ -1,7 +1,7 @@
 {
   "heroHeadline": "STAY LACED.",
   "heroSubtext": "Bold colors. Timeless silhouettes. Shop the new high and low collection.",
-  "promoEnabled": false,
+  "promoEnabled": true,
   "promoText": "FREE SHIPPING ON ALL ORDERS OVER TK 200",
   "heroImages": [
     "hero.png"
@@ -11,5 +11,5 @@
     "lookbook2.png",
     "lookbook3.png"
   ],
-  "_savedAt": 1776983652874
+  "_savedAt": 1776983659390
 }
