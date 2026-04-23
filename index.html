@@ -144,15 +144,21 @@
             });
         });
 
-        // Shrink navbar on scroll
+        // Shrink navbar on scroll — throttled with rAF to prevent jitter
         const navbar = document.querySelector('.navbar');
+        let scrollScheduled = false;
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
+            if (scrollScheduled) return;
+            scrollScheduled = true;
+            requestAnimationFrame(() => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                scrollScheduled = false;
+            });
+        }, { passive: true });
     </script>
     <script src="cart.js?v=2"></script>
     <script src="search.js?v=2"></script>
