@@ -19,9 +19,8 @@
     ],
     "description": "The iconic high top silhouette in timeless black canvas. A staple for any wardrobe, offering durable comfort and classic street style.",
     "visible": true,
-    "onSale": false,
-    "imageUrl": "black-high.png",
-    "stock": {}
+    "onSale": true,
+    "imageUrl": "black-high.png"
   },
   {
     "id": "white-low",
@@ -65,7 +64,8 @@
     "description": "Make a statement with our vibrant Color Drops collection. Featuring bold primary colors and premium stitching for a standout look.",
     "visible": true,
     "onSale": true,
-    "imageUrl": "color-drops.png"
+    "imageUrl": "color-drops.png",
+    "stock": {}
   },
   {
     "id": "platform",
