@@ -200,6 +200,7 @@ document.getElementById('openAddProductBtn').addEventListener('click', () => {
     document.getElementById('vpColors').innerText = '';
     document.getElementById('vpDesc').innerText = '';
     document.getElementById('vpVisible').checked = true;
+    document.getElementById('vpOnSale').checked = false;
     document.getElementById('vpImagePreview').src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // Transparent placeholder
     document.getElementById('vpImageInput').value = '';
     document.getElementById('vpSaleBadge').style.display = 'none';
@@ -532,6 +533,8 @@ document.getElementById('saveProductBtn').addEventListener('click', async () => 
             colors: document.getElementById('vpColors').innerText.split(',').map(c => c.trim()).filter(c => c),
             description: document.getElementById('vpDesc').innerText.trim(),
             visible: document.getElementById('vpVisible').checked,
+            onSale: document.getElementById('vpOnSale').checked,
+            imageUrl: imageUrl
         };
 
         if (id) {
@@ -577,6 +580,7 @@ function editProduct(id) {
         document.getElementById('vpColors').innerText = p.colors.join(', ');
         document.getElementById('vpDesc').innerText = p.description;
         document.getElementById('vpVisible').checked = p.visible;
+        document.getElementById('vpOnSale').checked = p.onSale || false;
         document.getElementById('vpImagePreview').src = p.imageUrl || '';
         document.getElementById('vpImageInput').value = '';
         

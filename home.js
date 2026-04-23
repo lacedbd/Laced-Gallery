@@ -59,13 +59,20 @@ function renderProducts(products) {
     products.forEach((p) => {
         if (p.visible) {
             found = true;
+            let soldOut = false;
+            if (typeof p.stock === 'number') {
+                soldOut = p.stock <= 0;
+            } else if (typeof p.stock === 'object' && p.stock !== null) {
+                soldOut = Object.values(p.stock).reduce((a, b) => a + b, 0) <= 0;
+            }
+
             const a = document.createElement('a');
             a.href = `product.html?id=${p.id}`;
             a.className = 'grid-item';
             a.style.background = '#f8f9fa';
             a.innerHTML = `
                 <div class="img-wrapper">
-                    ${p.compareAtPrice && p.compareAtPrice > p.price ? '<span class="sale-badge">SALE</span>' : ''}
+                    ${soldOut ? '<span class="sale-badge" style="background:#000;">SOLD OUT</span>' : (p.onSale ? '<span class="sale-badge">SALE</span>' : '')}
                     <img src="${p.imageUrl}" alt="${p.name}">
                 </div>
                 <h3>${p.name}</h3>

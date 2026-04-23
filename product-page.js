@@ -22,10 +22,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let priceHTML = '';
                 if (product.compareAtPrice && product.compareAtPrice > product.price) {
                     priceHTML = `<span class="compare-price">Tk ${product.compareAtPrice.toLocaleString()}</span>`;
+                }
+                priceHTML += `Tk ${product.price.toLocaleString()}`;
+                
+                if (product.onSale) {
                     const badge = document.getElementById('liveSaleBadge');
                     if (badge) badge.style.display = 'block';
                 }
-                priceHTML += `Tk ${product.price.toLocaleString()}`;
                 
                 document.getElementById('productPrice').innerHTML = priceHTML;
                 document.getElementById('mainProductImg').src = product.imageUrl;
@@ -48,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
                         btn.classList.add('selected');
                         selectedColor = c;
+                        updateCartButton();
                     });
                     colorContainer.appendChild(btn);
                 });
@@ -65,6 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
                         btn.classList.add('selected');
                         selectedSize = s;
+                        updateCartButton();
                     });
                     sizeContainer.appendChild(btn);
                 });
@@ -73,11 +78,41 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const newBtn = oldBtn.cloneNode(true);
                 oldBtn.parentNode.replaceChild(newBtn, oldBtn);
 
+                function updateCartButton() {
+                    let variantStock = 10; // Default
+                    if (typeof product.stock === 'number') {
+                        variantStock = product.stock;
+                    } else if (typeof product.stock === 'object' && product.stock !== null) {
+                        if (selectedSize && selectedColor) {
+                            variantStock = product.stock[`${selectedSize}_${selectedColor}`] || 0;
+                        } else {
+                            // If no size selected yet, check if ANY variant has stock
+                            variantStock = Object.values(product.stock).reduce((a, b) => a + b, 0);
+                        }
+                    }
+
+                    if (variantStock <= 0) {
+                        newBtn.textContent = 'Sold Out';
+                        newBtn.disabled = true;
+                        newBtn.style.opacity = '0.5';
+                        newBtn.style.cursor = 'not-allowed';
+                    } else {
+                        newBtn.textContent = 'Add to Cart';
+                        newBtn.disabled = false;
+                        newBtn.style.opacity = '1';
+                        newBtn.style.cursor = 'pointer';
+                    }
+                }
+                
+                // Initial check
+                updateCartButton();
+
                 newBtn.addEventListener('click', () => {
                     if (!selectedSize) {
                         alert('Please select a size first!');
                         return;
                     }
+                    if (newBtn.disabled) return;
                     window.addToCart({
                         id: product.id,
                         name: product.name,
