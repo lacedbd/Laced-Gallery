@@ -269,7 +269,6 @@ async function loadProducts() {
         console.error("Error loading products:", error);
         productsTableBody.innerHTML = '<tr><td colspan="6">Error loading products. Check console.</td></tr>';
     }
-    }
 }
 
 function renderInventory() {
