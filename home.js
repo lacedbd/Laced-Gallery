@@ -1,26 +1,30 @@
 import { getRawDataUrl } from './config.js';
 
-// Reusable render functions so we can call them on load AND on live preview
+const SETTINGS_CACHE_KEY = 'laced_settings_cache';
+
+// ── Apply settings to the page ───────────────────────────────────────────────
 function renderSettings(s) {
-    if (s.heroHeadline) document.querySelector('.hero h1').textContent = s.heroHeadline;
-    if (s.heroSubtext) document.querySelector('.hero p').textContent = s.heroSubtext;
-    
+    const h1 = document.querySelector('.hero h1');
+    const p  = document.querySelector('.hero p');
+    if (h1 && s.heroHeadline) h1.textContent = s.heroHeadline;
+    if (p  && s.heroSubtext)  p.textContent  = s.heroSubtext;
+
     const hero = document.querySelector('.hero');
-    if (s.heroImages && s.heroImages.length > 0) {
-        hero.style.backgroundImage = `url('${s.heroImages[0]}')`;
-        hero.style.transition = 'background-image 1s ease-in-out';
-        
-        if (s.heroImages.length > 1) {
-            let currentIdx = 0;
-            setInterval(() => {
-                currentIdx = (currentIdx + 1) % s.heroImages.length;
-                hero.style.backgroundImage = `url('${s.heroImages[currentIdx]}')`;
-            }, 5000);
+    if (hero) {
+        if (s.heroImages && s.heroImages.length > 0) {
+            hero.style.backgroundImage = `url('${s.heroImages[0]}')`;
+            if (s.heroImages.length > 1) {
+                let idx = 0;
+                setInterval(() => {
+                    idx = (idx + 1) % s.heroImages.length;
+                    hero.style.backgroundImage = `url('${s.heroImages[idx]}')`;
+                }, 5000);
+            }
+        } else if (s.heroImageUrl) {
+            hero.style.backgroundImage = `url('${s.heroImageUrl}')`;
         }
-    } else if (s.heroImageUrl) {
-        hero.style.backgroundImage = `url('${s.heroImageUrl}')`;
     }
-    
+
     const promoBar = document.querySelector('.promo-bar');
     if (promoBar) {
         if (s.promoEnabled) {
@@ -35,7 +39,7 @@ function renderSettings(s) {
         }
     }
 
-    const lookbookSection = document.getElementById('lookbookSection');
+    const lookbookSection  = document.getElementById('lookbookSection');
     const lookbookCarousel = document.getElementById('lookbookCarousel');
     if (lookbookSection && lookbookCarousel) {
         if (s.lookbookImages && s.lookbookImages.length > 0) {
@@ -53,10 +57,10 @@ function renderSettings(s) {
     }
 }
 
+// ── Render product grid ───────────────────────────────────────────────────────
 function renderProducts(products) {
     const grid = document.querySelector('.grid');
-    grid.innerHTML = ''; 
-    
+    grid.innerHTML = '';
     let found = false;
     products.forEach((p) => {
         if (p.visible) {
@@ -67,7 +71,6 @@ function renderProducts(products) {
             } else if (typeof p.stock === 'object' && p.stock !== null) {
                 soldOut = Object.values(p.stock).reduce((a, b) => a + b, 0) <= 0;
             }
-
             const a = document.createElement('a');
             a.href = `product.html?id=${p.id}`;
             a.className = 'grid-item';
@@ -86,45 +89,56 @@ function renderProducts(products) {
             grid.appendChild(a);
         }
     });
-    
     if (!found) {
         grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No products available right now. Check back soon!</p>';
     }
 }
 
+// ── Main ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Apply cached settings INSTANTLY to avoid flash of old content
-    const SETTINGS_CACHE_KEY = 'laced_settings_cache';
+
+    // 1. Apply cached settings immediately so layout looks right (BG, promo bar)
     const cached = localStorage.getItem(SETTINGS_CACHE_KEY);
     if (cached) {
         try { renderSettings(JSON.parse(cached)); } catch(e) {}
     }
 
-    // 2. Fetch fresh settings from network, silently update cache + UI
+    // 2. Hide the hero TEXT to prevent any flash of stale/wrong headline
+    const heroContent = document.querySelector('.hero-content');
+    if (heroContent) heroContent.style.opacity = '0';
+
+    // 3. Fetch FRESH settings, update everything, then reveal
     try {
-        const response = await fetch(getRawDataUrl('settings.json'));
-        if (response.ok) {
-            const s = await response.json();
+        const res = await fetch(getRawDataUrl('settings.json'));
+        if (res.ok) {
+            const s = await res.json();
             localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(s));
             renderSettings(s);
         }
     } catch (err) {
-        console.error("Error loading settings", err);
+        console.error('Error loading settings', err);
     }
 
-    // 2. Fetch Products
+    // 4. Smooth fade-in once correct content is in place
+    if (heroContent) {
+        heroContent.style.transition = 'opacity 0.3s ease';
+        heroContent.style.opacity = '1';
+    }
+
+    // 5. Fetch products
     try {
-        const response = await fetch(getRawDataUrl('products.json'));
-        if (response.ok) {
-            const products = await response.json();
+        const res = await fetch(getRawDataUrl('products.json'));
+        if (res.ok) {
+            const products = await res.json();
             renderProducts(products);
         }
     } catch (err) {
-        console.error("Error fetching products", err);
+        console.error('Error fetching products', err);
     }
 
+    // 6. View-mode toggle buttons
     const singleViewBtn = document.getElementById('singleViewBtn');
-    const gridViewBtn = document.getElementById('gridViewBtn');
+    const gridViewBtn   = document.getElementById('gridViewBtn');
     if (singleViewBtn && gridViewBtn) {
         singleViewBtn.addEventListener('click', () => {
             const grid = document.querySelector('.grid');
@@ -144,4 +158,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 });
-
