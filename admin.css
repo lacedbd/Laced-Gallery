@@ -173,6 +173,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 }
 
 /* Cropper Container override */
+.croppie-container {
+    padding-bottom: 40px;
+}
 .croppie-container .cr-viewport {
     border: 2px solid #fff;
     box-shadow: 0 0 0 1000px rgba(0,0,0,0.5);
