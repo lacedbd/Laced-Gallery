@@ -667,9 +667,14 @@ document.getElementById('newImageInput').addEventListener('change', function(e) 
         reader.onload = function(event) {
             document.getElementById('cropperModal').classList.remove('hidden');
             initCroppie();
-            croppieInstance.bind({
-                url: event.target.result
-            });
+            // Wait for modal to render to avoid zero-size container bugs
+            setTimeout(() => {
+                croppieInstance.bind({
+                    url: event.target.result
+                }).then(() => {
+                    console.log('Croppie bind complete');
+                });
+            }, 100);
         };
         reader.readAsDataURL(this.files[0]);
     }
