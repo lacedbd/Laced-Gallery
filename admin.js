@@ -502,13 +502,7 @@ document.getElementById('saveProductBtn').addEventListener('click', async () => 
 
     try {
         const id = document.getElementById('vpId').value;
-        const file = document.getElementById('vpImageInput').files[0];
         
-        let imageUrl = '';
-        if (file) {
-            imageUrl = await uploadImageToGithub(file);
-        }
-
         const comparePriceText = document.getElementById('vpComparePrice').innerText.trim().replace(/[^0-9.]/g, '');
         const comparePrice = comparePriceText ? Number(comparePriceText) : null;
         
@@ -541,16 +535,16 @@ document.getElementById('saveProductBtn').addEventListener('click', async () => 
             imageUrls: finalImageUrls
         };
 
+        if (!productData.imageUrl && finalImageUrls.length === 0) {
+            throw new Error("At least one image is required. Please click Manage Images.");
+        }
+
         if (id) {
             const index = productsCache.findIndex(p => p.id === id);
-            if(index !== -1) {
-                if (imageUrl) productData.imageUrl = imageUrl; 
-                else productData.imageUrl = productsCache[index].imageUrl; 
+            if (index !== -1) {
                 productsCache[index] = productData;
             }
         } else {
-            if (!imageUrl) throw new Error("Image is required for new products. Please click Change Image.");
-            productData.imageUrl = imageUrl;
             productsCache.push(productData);
         }
 
