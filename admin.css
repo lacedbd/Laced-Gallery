@@ -124,5 +124,56 @@ td img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; backg
 .row-group label { margin-bottom: 0; }
 hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 .status-msg { margin-top: 1rem; font-size: 0.9rem; color: green; }
+/* Product Thumbnail Strip */
+.product-thumbnails {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+.product-thumbnails .thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    background: #f0f0f0;
+    transition: 0.2s;
+}
+.product-thumbnails .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.product-thumbnails .thumb.active {
+    border-color: #000;
+}
 
+/* Image Manager Modal */
+.image-manager-item {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.image-manager-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.mgr-btn {
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.mgr-btn:hover:not(:disabled) {
+    background: #eee;
+}
+.mgr-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
 
+/* Cropper Container override */
+.croppie-container .cr-viewport {
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1000px rgba(0,0,0,0.5);
+}

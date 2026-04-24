@@ -10,12 +10,17 @@ const logoutBtn = document.getElementById('logoutBtn');
 const GITHUB_API_BASE = `https://api.github.com/repos/${CONFIG.githubUsername}/${CONFIG.githubRepo}/contents`;
 let githubToken = localStorage.getItem('laced_github_token') || '';
 
-let currentSettingsSha = null;
-let currentSettingsState = {};
 let currentProductsSha = null;
 let productsCache = [];
-let currentInventoryHistorySha = null;
 let inventoryHistoryCache = [];
+let currentInventoryHistorySha = null;
+let settingsCache = null;
+let currentSettingsSha = null;
+
+// IMAGE MANAGER STATE
+let workingImages = []; // Array of image URLs (can be blob/base64 during edit)
+let croppieInstance = null;
+let currentEditingImageIndex = -1; // -1 means new image
 
 // =========================================================
 // GITHUB API HELPERS
@@ -176,19 +181,7 @@ const productsTableBody = document.getElementById('productsTableBody');
 const productsListView = document.getElementById('productsListView');
 const productVisualEditor = document.getElementById('productVisualEditor');
 
-const vpImageInput = document.getElementById('vpImageInput');
-const vpImagePreview = document.getElementById('vpImagePreview');
-
-document.getElementById('changeProductImageBtn').addEventListener('click', () => {
-    vpImageInput.click();
-});
-
-vpImageInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        vpImagePreview.src = URL.createObjectURL(file);
-    }
-});
+// Manage Images handled by manageProductImagesBtn logic below
 
 document.getElementById('openAddProductBtn').addEventListener('click', () => {
     document.getElementById('vpId').value = '';
@@ -201,8 +194,11 @@ document.getElementById('openAddProductBtn').addEventListener('click', () => {
     document.getElementById('vpDesc').innerText = '';
     document.getElementById('vpVisible').checked = true;
     document.getElementById('vpOnSale').checked = false;
-    document.getElementById('vpImagePreview').src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // Transparent placeholder
-    document.getElementById('vpImageInput').value = '';
+    
+    // Clear working images
+    workingImages = [];
+    updateVpGalleryPreview();
+    
     document.getElementById('vpSaleBadge').style.display = 'none';
     
     productsListView.classList.add('hidden');
@@ -518,6 +514,18 @@ document.getElementById('saveProductBtn').addEventListener('click', async () => 
         
         const sizes = Array.from(document.querySelectorAll('#vpSizesContainer input[type="checkbox"]:checked')).map(cb => cb.value);
 
+        // Upload all new base64 images to GitHub
+        const finalImageUrls = [];
+        for (const img of workingImages) {
+            if (img.startsWith('data:image')) {
+                const blob = await (await fetch(img)).blob();
+                const uploadedUrl = await uploadImageToGithub(blob);
+                finalImageUrls.push(uploadedUrl);
+            } else {
+                finalImageUrls.push(img);
+            }
+        }
+
         const productData = {
             id: id || 'prod_' + Date.now().toString(36),
             name: document.getElementById('vpName').innerText.trim() || 'Untitled Product',
@@ -529,7 +537,8 @@ document.getElementById('saveProductBtn').addEventListener('click', async () => 
             description: document.getElementById('vpDesc').innerText.trim(),
             visible: document.getElementById('vpVisible').checked,
             onSale: document.getElementById('vpOnSale').checked,
-            imageUrl: imageUrl
+            imageUrl: finalImageUrls[0] || '', // Primary image is the first one
+            imageUrls: finalImageUrls
         };
 
         if (id) {
@@ -547,6 +556,7 @@ document.getElementById('saveProductBtn').addEventListener('click', async () => 
 
         currentProductsSha = await saveJsonFile('data/products.json', productsCache, currentProductsSha, `Update product ${productData.name}`);
 
+        await showCustomAlert("Success", "Product published successfully!");
         productsListView.classList.remove('hidden');
         productVisualEditor.classList.add('hidden');
         loadProducts();
@@ -576,14 +586,160 @@ function editProduct(id) {
         document.getElementById('vpDesc').innerText = p.description;
         document.getElementById('vpVisible').checked = p.visible;
         document.getElementById('vpOnSale').checked = p.onSale || false;
-        document.getElementById('vpImagePreview').src = p.imageUrl || '';
-        document.getElementById('vpImageInput').value = '';
         
-        updateSaleBadgePreview();
+        // Populate working images
+        workingImages = p.imageUrls ? [...p.imageUrls] : (p.imageUrl ? [p.imageUrl] : []);
+        updateVpGalleryPreview();
         
         productsListView.classList.add('hidden');
         productVisualEditor.classList.remove('hidden');
     }
+}
+
+// Visual Editor Preview Helpers
+function updateVpGalleryPreview() {
+    const mainImg = document.getElementById('vpImagePreview');
+    const thumbContainer = document.getElementById('vpThumbsPreview');
+    
+    if (workingImages.length > 0) {
+        mainImg.src = workingImages[0];
+    } else {
+        mainImg.src = '';
+    }
+    
+    if (thumbContainer) {
+        thumbContainer.innerHTML = '';
+        if (workingImages.length > 1) {
+            workingImages.forEach((url, i) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'thumb' + (i === 0 ? ' active' : '');
+                thumb.innerHTML = `<img src="${url}">`;
+                thumb.addEventListener('click', () => {
+                    mainImg.src = url;
+                    thumbContainer.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+                    thumb.classList.add('active');
+                });
+                thumbContainer.appendChild(thumb);
+            });
+        }
+    }
+}
+
+// =========================================================
+// IMAGE MANAGEMENT LOGIC
+// =========================================================
+
+// Initialize Croppie
+function initCroppie() {
+    const el = document.getElementById('cropperContainer');
+    if (croppieInstance) croppieInstance.destroy();
+    croppieInstance = new Croppie(el, {
+        viewport: { width: 300, height: 300, type: 'square' },
+        boundary: { width: 350, height: 350 },
+        showZoomer: true,
+        enableOrientation: true
+    });
+}
+
+// Handle Manage Images Click
+document.getElementById('manageProductImagesBtn').addEventListener('click', () => {
+    renderImageManagerGrid();
+    document.getElementById('imageManagerModal').classList.remove('hidden');
+});
+
+document.getElementById('closeImageManager').addEventListener('click', () => {
+    document.getElementById('imageManagerModal').classList.add('hidden');
+});
+
+document.getElementById('saveImagesBtn').addEventListener('click', () => {
+    document.getElementById('imageManagerModal').classList.add('hidden');
+    updateVpGalleryPreview();
+});
+
+// Add New Image
+document.getElementById('addNewImageBtn').addEventListener('click', () => {
+    document.getElementById('newImageInput').click();
+});
+
+document.getElementById('newImageInput').addEventListener('change', function(e) {
+    if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('cropperModal').classList.remove('hidden');
+            initCroppie();
+            croppieInstance.bind({
+                url: event.target.result
+            });
+        };
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+
+document.getElementById('cancelCrop').addEventListener('click', () => {
+    document.getElementById('cropperModal').classList.add('hidden');
+    document.getElementById('newImageInput').value = '';
+});
+
+document.getElementById('applyCrop').addEventListener('click', () => {
+    croppieInstance.result({
+        type: 'base64',
+        size: 'viewport',
+        format: 'png',
+        quality: 1
+    }).then(function(base64) {
+        workingImages.push(base64);
+        document.getElementById('cropperModal').classList.add('hidden');
+        document.getElementById('newImageInput').value = '';
+        renderImageManagerGrid();
+    });
+});
+
+function renderImageManagerGrid() {
+    const grid = document.getElementById('imageManagerGrid');
+    grid.innerHTML = '';
+    
+    workingImages.forEach((img, index) => {
+        const item = document.createElement('div');
+        item.className = 'image-manager-item';
+        item.style = 'position:relative; background:#f9f9f9; padding:10px; border-radius:8px; border:1px solid #eee; text-align:center;';
+        
+        item.innerHTML = `
+            <img src="${img}" style="width:100%; aspect-ratio:1; object-fit:contain; background:#fff; border-radius:4px; margin-bottom:8px;">
+            <div style="display:flex; justify-content:center; gap:5px;">
+                <button class="mgr-btn move-left" data-index="${index}" style="padding:4px 8px; font-size:0.7rem;" ${index === 0 ? 'disabled' : ''}>←</button>
+                <button class="mgr-btn delete-img" data-index="${index}" style="padding:4px 8px; font-size:0.7rem; background:#ff4444; color:#fff;">Delete</button>
+                <button class="mgr-btn move-right" data-index="${index}" style="padding:4px 8px; font-size:0.7rem;" ${index === workingImages.length - 1 ? 'disabled' : ''}>→</button>
+            </div>
+            ${index === 0 ? '<span style="position:absolute; top:5px; left:5px; background:#000; color:#fff; font-size:0.6rem; padding:2px 5px; border-radius:3px;">Main</span>' : ''}
+        `;
+        
+        grid.appendChild(item);
+    });
+    
+    // Attach event listeners to the buttons
+    grid.querySelectorAll('.move-left').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-index'));
+            [workingImages[idx - 1], workingImages[idx]] = [workingImages[idx], workingImages[idx - 1]];
+            renderImageManagerGrid();
+        });
+    });
+    
+    grid.querySelectorAll('.move-right').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-index'));
+            [workingImages[idx], workingImages[idx + 1]] = [workingImages[idx + 1], workingImages[idx]];
+            renderImageManagerGrid();
+        });
+    });
+    
+    grid.querySelectorAll('.delete-img').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-index'));
+            workingImages.splice(idx, 1);
+            renderImageManagerGrid();
+        });
+    });
 }
 
 async function deleteProduct(id) {
