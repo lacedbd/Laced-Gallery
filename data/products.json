@@ -20,7 +20,11 @@
     "description": "The iconic high top silhouette in timeless black canvas. A staple for any wardrobe, offering durable comfort and classic street style.",
     "visible": true,
     "onSale": true,
-    "imageUrl": "black-high.png"
+    "imageUrl": "black-high.png",
+    "imageUrls": [
+      "black-high.png"
+    ],
+    "stock": {}
   },
   {
     "id": "white-low",
@@ -89,5 +93,22 @@
     "visible": true,
     "imageUrl": "platform.png",
     "stock": {}
+  },
+  {
+    "id": "prod_moc6abkg",
+    "name": "UNTITLED PRODUCT",
+    "price": 0,
+    "compareAtPrice": null,
+    "category": "high",
+    "sizes": [],
+    "colors": [],
+    "description": "",
+    "visible": false,
+    "onSale": false,
+    "imageUrl": "https://raw.githubusercontent.com/lacedbd/Laced-Gallery/main/data/images/1776990536488_undefined",
+    "imageUrls": [
+      "https://raw.githubusercontent.com/lacedbd/Laced-Gallery/main/data/images/1776990536488_undefined",
+      "https://raw.githubusercontent.com/lacedbd/Laced-Gallery/main/data/images/1776990538170_undefined"
+    ]
   }
 ]
