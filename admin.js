@@ -742,15 +742,23 @@ function renderImageManagerGrid() {
 }
 
 async function deleteProduct(id) {
-    if (confirm("Are you sure you want to delete this product?")) {
+    const p = productsCache.find(prod => prod.id === id);
+    const pName = p ? p.name : id;
+    
+    const isConfirmed = await showCustomConfirm(
+        "Delete Product", 
+        `Are you sure you want to permanently delete "${pName}"? This action cannot be undone.`
+    );
+    
+    if (isConfirmed) {
         try {
-            const pName = productsCache.find(p => p.id === id)?.name || id;
             productsCache = productsCache.filter(p => p.id !== id);
             currentProductsSha = await saveJsonFile('data/products.json', productsCache, currentProductsSha, `Delete product ${pName}`);
+            await showCustomAlert("Deleted", "Product has been removed from the catalog.");
             loadProducts();
         } catch (error) {
             console.error("Error deleting product:", error);
-            alert("Error deleting product.");
+            await showCustomAlert("Error", "Failed to delete product. Please try again.");
         }
     }
 }
